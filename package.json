@@ -1,0 +1,20 @@
+{
+  "name": "ttegak-rehearsal",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "postinstall": "npm install --prefix client",
+    "server": "node server/index.js",
+    "client": "npm --prefix client run dev",
+    "dev": "concurrently -n server,client -c green,cyan \"npm run server\" \"npm run client\""
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "dotenv": "^16.4.5",
+    "@google/genai": "^2.13.0"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
