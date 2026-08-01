@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-export default function ClosingContact() {
+export default function ClosingContact({ onNavigate }) {
   const [activity, setActivity] = useState("자동차 주차장 만들기");
   const [content, setContent] = useState(
     "아이가 장난감 자동차에 관심을 보여 주차장 조립 및 놀이 활동을 진행했습니다."
@@ -40,6 +40,33 @@ export default function ClosingContact() {
 
   return (
     <div className="contact-template-container">
+      {onNavigate && (
+        <div className="nav-header">
+          <button
+            type="button"
+            className="nav-back-btn"
+            onClick={() => onNavigate("/")}
+          >
+            ← 째깍 리허설 홈
+          </button>
+          <div className="nav-tab-group">
+            <button
+              type="button"
+              className="nav-tab-btn"
+              onClick={() => onNavigate("/contact/matching")}
+            >
+              첫 연락
+            </button>
+            <button
+              type="button"
+              className="nav-tab-btn active"
+              onClick={() => onNavigate("/contact/closing")}
+            >
+              종료 메시지
+            </button>
+          </div>
+        </div>
+      )}
       <div className="template-card">
         <div className="template-badge">보호자 종료 메시지 템플릿</div>
         <h2 className="template-title">활동 완료 메시지 자동 작성</h2>

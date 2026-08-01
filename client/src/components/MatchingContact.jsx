@@ -38,7 +38,7 @@ const TONES = {
   },
 };
 
-export default function MatchingContact() {
+export default function MatchingContact({ onNavigate }) {
   const [situation, setSituation] = useState("매칭 후 첫인사");
   const [name, setName] = useState("김OO");
   const [child, setChild] = useState("OO");
@@ -73,6 +73,33 @@ export default function MatchingContact() {
 
   return (
     <div className="contact-template-container">
+      {onNavigate && (
+        <div className="nav-header">
+          <button
+            type="button"
+            className="nav-back-btn"
+            onClick={() => onNavigate("/")}
+          >
+            ← 째깍 리허설 홈
+          </button>
+          <div className="nav-tab-group">
+            <button
+              type="button"
+              className="nav-tab-btn active"
+              onClick={() => onNavigate("/contact/matching")}
+            >
+              첫 연락
+            </button>
+            <button
+              type="button"
+              className="nav-tab-btn"
+              onClick={() => onNavigate("/contact/closing")}
+            >
+              종료 메시지
+            </button>
+          </div>
+        </div>
+      )}
       <div className="template-card">
         <div className="template-badge">보호자 첫 연락 템플릿</div>
         <h2 className="template-title">매칭 직후 첫 연락 문구 작성</h2>

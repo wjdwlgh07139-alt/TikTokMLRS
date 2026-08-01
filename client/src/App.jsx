@@ -32,7 +32,7 @@ function MoodGauge({ mood }) {
   );
 }
 
-function Home({ onSelect }) {
+function Home({ onSelect, onNavigate }) {
   const children = SCENARIOS.filter((s) => s.group === "child");
   const parents = SCENARIOS.filter((s) => s.group === "parent");
 
@@ -58,6 +58,30 @@ function Home({ onSelect }) {
           {parents.map((s) => (
             <ScenarioCard key={s.id} scenario={s} onSelect={onSelect} />
           ))}
+        </div>
+      </div>
+
+      <div>
+        <div className="group-label">📩 메시지 템플릿 도구</div>
+        <div className="card-grid">
+          <button
+            type="button"
+            className="scenario-card template-nav-card"
+            onClick={() => onNavigate("/contact/matching")}
+          >
+            <span className="badge template">첫 연락</span>
+            <div className="title">🤝 보호자 첫 연락 템플릿</div>
+            <div className="desc">상황·말투별 첫인사 문구 생성</div>
+          </button>
+          <button
+            type="button"
+            className="scenario-card template-nav-card"
+            onClick={() => onNavigate("/contact/closing")}
+          >
+            <span className="badge template">종료 메시지</span>
+            <div className="title">🏁 활동 완료 메시지 템플릿</div>
+            <div className="desc">활동 결과 및 특이사항 요약</div>
+          </button>
         </div>
       </div>
     </>
@@ -304,14 +328,30 @@ function Review({ scenario, transcript, onRetry, onHome }) {
   );
 }
 export default function App() {
-  const path = window.location.pathname.replace(/\/$/, "");
+  const [currentPath, setCurrentPath] = useState(
+    window.location.pathname.replace(/\/$/, "")
+  );
 
-  if (path === "/contact/matching") {
-    return <MatchingContact />;
+  useEffect(() => {
+    const onPopState = () => {
+      setCurrentPath(window.location.pathname.replace(/\/$/, ""));
+    };
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, []);
+
+  function handleNavigate(path) {
+    window.history.pushState({}, "", path);
+    setCurrentPath(path.replace(/\/$/, ""));
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
-  if (path === "/contact/closing") {
-    return <ClosingContact />;
+  if (currentPath === "/contact/matching") {
+    return <MatchingContact onNavigate={handleNavigate} />;
+  }
+
+  if (currentPath === "/contact/closing") {
+    return <ClosingContact onNavigate={handleNavigate} />;
   }
 
   const [screen, setScreen] = useState("home");
@@ -343,12 +383,24 @@ export default function App() {
 
   return (
     <div className="app">
-      {screen === "home" && <Home onSelect={selectScenario} />}
+      {screen === "home" && (
+        <Home onSelect={selectScenario} onNavigate={handleNavigate} />
+      )}
       {screen === "chat" && scenario && (
-        <Chat key={chatKey} scenario={scenario} onDone={finishChat} onExit={goHome} />
+        <Chat
+          key={chatKey}
+          scenario={scenario}
+          onDone={finishChat}
+          onExit={goHome}
+        />
       )}
       {screen === "review" && scenario && (
-        <Review scenario={scenario} transcript={transcript} onRetry={retry} onHome={goHome} />
+        <Review
+          scenario={scenario}
+          transcript={transcript}
+          onRetry={retry}
+          onHome={goHome}
+        />
       )}
     </div>
   );
