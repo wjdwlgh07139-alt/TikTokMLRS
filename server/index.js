@@ -156,6 +156,4 @@ const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`[쨰깍 리허설] server listening on http://localhost:${PORT}`);
 });
-app.listen(PORT, () => {
-  console.log(`[쨰깍 리허설] server listening on http://localhost:${PORT}`);
-});
+

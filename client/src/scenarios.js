@@ -4,7 +4,7 @@ export const SCENARIOS = [
     id: "shy",
     group: "child",
     emoji: "🙈",
-    title: "미간거리는 아이",
+    title: "수줍음 타는 아이",
     age: "6세",
     tag: "경계 높음·서두르지 않기",
     mood0: 2,
