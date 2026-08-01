@@ -655,59 +655,260 @@ a:focus-visible {
   }
 }
 
-/* ---------- Navigation Header & Template Nav Cards ---------- */
+/* ---------- Main Top Navigation Bar & Mobile Layout ---------- */
 
-.nav-header {
+.main-navbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.nav-back-btn {
-  background: transparent;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  padding: 6px 14px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--sub);
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.nav-back-btn:hover {
   background: var(--panel);
-  color: var(--ink);
-  border-color: var(--green);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 10px 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+  gap: 10px;
 }
 
-.nav-tab-group {
+@media (max-width: 600px) {
+  .main-navbar {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 10px 12px;
+    gap: 8px;
+  }
+}
+
+.navbar-brand {
   display: flex;
-  background: var(--line);
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.navbar-brand .logo-icon {
+  font-size: 1.3rem;
+}
+
+.navbar-brand .logo-text {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.navbar-tabs {
+  display: flex;
+  background: var(--bg);
   padding: 3px;
   border-radius: 999px;
-  gap: 2px;
+  gap: 4px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
-.nav-tab-btn {
+@media (max-width: 600px) {
+  .navbar-tabs {
+    justify-content: space-around;
+    width: 100%;
+  }
+}
+
+.nav-tab-item {
   background: transparent;
   border: none;
   border-radius: 999px;
-  padding: 6px 14px;
-  font-size: 0.82rem;
-  font-weight: 600;
+  padding: 8px 14px;
+  font-size: 0.85rem;
+  font-weight: 700;
   color: var(--sub);
   cursor: pointer;
   transition: all 0.2s ease;
+  white-space: nowrap;
+  min-height: 38px;
 }
 
-.nav-tab-btn.active {
+.nav-tab-item:hover {
+  color: var(--ink);
+}
+
+.nav-tab-item.active {
   background: var(--panel);
   color: var(--green);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+/* ---------- Template Styling & Mobile Mobile Usability ---------- */
+
+.d-eyebrow {
+  display: inline-block;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #087566;
+  background: #E3F5F1;
+  padding: 4px 10px;
+  border-radius: 999px;
+  margin-bottom: 8px;
+}
+
+.d-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin: 0 0 16px;
+  color: var(--ink);
+}
+
+.template-card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 10px 30px -15px rgba(20, 40, 35, 0.1);
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+@media (max-width: 600px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.field.full {
+  grid-column: 1 / -1;
+}
+
+.field label {
+  font-size: 11.5px;
+  color: var(--sub);
+  font-weight: 700;
+}
+
+.field select,
+.field input,
+.field textarea {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 14px; /* 16px or 14px for comfortable touch on mobile */
+  font-family: inherit;
+  background: #fafbfa;
+  color: var(--ink);
+  transition: border-color 0.2s ease;
+}
+
+.field select:focus,
+.field input:focus,
+.field textarea:focus {
+  border-color: #0eaf9b;
+  outline: none;
+  background: #ffffff;
+}
+
+.pill-group {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.pill {
+  border: 1px solid var(--line);
+  background: var(--panel);
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  color: var(--sub);
+  transition: all 0.2s ease;
+  min-height: 38px;
+}
+
+.pill:hover {
+  border-color: #0eaf9b;
+}
+
+.pill.on {
+  border-color: #0eaf9b;
+  background: #0eaf9b;
+  color: #ffffff;
+}
+
+.preview {
+  background: #e3f5f1;
+  border-radius: 14px;
+  padding: 16px;
+  position: relative;
+  margin-top: 10px;
+}
+
+.preview .plabel {
+  font-size: 11px;
+  font-weight: 700;
+  color: #087566;
+  margin-bottom: 8px;
+}
+
+.preview .ptext {
+  background: #ffffff;
+  border-radius: 4px 12px 12px 12px;
+  padding: 12px 13px;
+  font-size: 13.5px;
+  line-height: 1.6;
+  box-shadow: 0 4px 10px -6px rgba(0, 0, 0, 0.15);
+  white-space: pre-line;
+  color: var(--ink);
+}
+
+.copy-btn {
+  margin-top: 12px;
+  border: 1px solid #0eaf9b;
+  color: #087566;
+  background: #ffffff;
+  padding: 10px 16px;
+  border-radius: 9px;
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  width: 100%;
+  transition: background 0.2s ease;
+}
+
+.copy-btn:hover {
+  background: #e3f5f1;
+}
+
+.toast {
+  position: absolute;
+  bottom: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--ink);
+  color: #ffffff;
+  font-size: 12px;
+  padding: 8px 16px;
+  border-radius: 20px;
+  opacity: 0;
+  transition: opacity 0.25s;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.toast.show {
+  opacity: 1;
 }
 
 .badge.template {
@@ -735,4 +936,5 @@ a:focus-visible {
   color: var(--sub);
   margin-top: 4px;
 }
+
 

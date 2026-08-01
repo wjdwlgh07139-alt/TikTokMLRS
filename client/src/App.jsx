@@ -32,6 +32,42 @@ function MoodGauge({ mood }) {
   );
 }
 
+function TopNavbar({ currentPath, onNavigate }) {
+  const norm = currentPath === "" ? "/" : currentPath;
+
+  return (
+    <header className="main-navbar">
+      <div className="navbar-brand" onClick={() => onNavigate("/")}>
+        <span className="logo-icon">🐣</span>
+        <span className="logo-text">쨰깍 리허설</span>
+      </div>
+      <nav className="navbar-tabs">
+        <button
+          type="button"
+          className={`nav-tab-item ${norm === "/" ? "active" : ""}`}
+          onClick={() => onNavigate("/")}
+        >
+          🎭 리허설
+        </button>
+        <button
+          type="button"
+          className={`nav-tab-item ${norm === "/contact/matching" ? "active" : ""}`}
+          onClick={() => onNavigate("/contact/matching")}
+        >
+          🤝 첫 연락
+        </button>
+        <button
+          type="button"
+          className={`nav-tab-item ${norm === "/contact/closing" ? "active" : ""}`}
+          onClick={() => onNavigate("/contact/closing")}
+        >
+          🏁 종료 메시지
+        </button>
+      </nav>
+    </header>
+  );
+}
+
 function Home({ onSelect, onNavigate }) {
   const children = SCENARIOS.filter((s) => s.group === "child");
   const parents = SCENARIOS.filter((s) => s.group === "parent");
@@ -98,15 +134,17 @@ function ScenarioCard({ scenario, onSelect }) {
         {scenario.group === "child" ? "아이" : "학부모"}
         {scenario.age ? ` · ${scenario.age}` : ""}
       </span>
-      <span className="emoji">{scenario.emoji}</span>
-      <span className="title">{scenario.title}</span>
-      <span className="tag">{scenario.tag}</span>
+      <div className="card-emoji">{scenario.emoji}</div>
+      <div className="card-title">{scenario.title}</div>
+      <div className="card-tag">{scenario.tag}</div>
     </button>
   );
 }
 
 function Chat({ scenario, onDone, onExit }) {
-  const [log, setLog] = useState([{ role: "assistant", content: scenario.opening }]);
+  const [log, setLog] = useState([
+    { role: "assistant", content: scenario.opening },
+  ]);
   const [mood, setMood] = useState(scenario.mood0);
   const [turnsLeft, setTurnsLeft] = useState(3);
   const [done, setDone] = useState(false);
@@ -123,14 +161,14 @@ function Chat({ scenario, onDone, onExit }) {
     const text = input.trim();
     if (!text || loading || done) return;
 
-    const nextLog = [...log, { role: "user", content: text }];
+    setError("");
+    const userMsg = { role: "user", content: text };
+    const nextLog = [...log, userMsg];
     setLog(nextLog);
     setInput("");
-    setError("");
     setLoading(true);
 
     try {
-      // log[0]은 프론트가 하드코딩한 opening 대사이므로 서버로 보낼 messages에서는 제외한다.
       const apiMessages = nextLog
         .slice(1)
         .map((m) => ({ role: m.role, content: m.content }));
@@ -148,8 +186,8 @@ function Chat({ scenario, onDone, onExit }) {
       setMood(data.mood ?? mood);
       setTurnsLeft(data.turnsLeft ?? 0);
       if (data.done) setDone(true);
-    } catch (err) {
-      setError("연결에 문제가 생겼어요. 다시 시도해주세요.");
+    } catch {
+      setError("응답을 불러오지 못했어요. 다시 시도해 주세요.");
     } finally {
       setLoading(false);
     }
@@ -163,70 +201,84 @@ function Chat({ scenario, onDone, onExit }) {
   }
 
   return (
-    <>
-      <div className="topbar">
-        <button className="back" onClick={onExit} aria-label="목록으로 돌아가기">
-          ←
+    <div className="chat-container">
+      <div className="chat-header">
+        <button className="icon-btn" onClick={onExit} aria-label="나가기">
+          ✕
         </button>
-        <div className="info">
-          <div className="title">
-            {scenario.emoji} {scenario.title}
-          </div>
-          <div className="tag">{scenario.tag}</div>
+        <div className="chat-title">
+          <span className="emoji">{scenario.emoji}</span>
+          <span className="title">{scenario.title}</span>
         </div>
         <MoodGauge mood={mood} />
       </div>
 
-      <div className="setup-card">{scenario.setup}</div>
+      <div className="scenario-banner">
+        <p className="mood-text">{MOOD_LABEL[mood] || ""}</p>
+        <p className="setup-text">{scenario.setup}</p>
+      </div>
 
       <div className="chat-log">
         {log.map((m, i) => (
-          <div key={i} className={`bubble-row ${m.role} ${scenario.group}`}>
-            <div className="bubble">{m.content}</div>
+          <div key={i} className={`chat-bubble ${m.role}`}>
+            <div className="speaker">{speakerLabel(scenario, m.role)}</div>
+            <div className="content">{m.content}</div>
           </div>
         ))}
-        {loading && <div className="typing">{speakerLabel(scenario, "assistant")}가 생각 중…</div>}
+        {loading && (
+          <div className="chat-bubble assistant loading">
+            <div className="speaker">{speakerLabel(scenario, "assistant")}</div>
+            <div className="content">생각하는 중…</div>
+          </div>
+        )}
         <div ref={logEndRef} />
       </div>
 
       {error && <div className="error-banner">{error}</div>}
 
-      {!done ? (
-        <>
-          <div className="composer">
-            <textarea
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="이렇게 말해볼게요…"
-              disabled={loading}
-              rows={1}
-            />
-            <button onClick={send} disabled={loading || !input.trim()}>
-              보내기
-            </button>
-          </div>
-          <div className="turns-left">남은 대화 {turnsLeft}번</div>
-        </>
-      ) : (
-        <div className="actions-row">
-          <button className="primary-btn" onClick={() => onDone(buildTranscript(scenario, log))}>
-            피드백 받기
+      <div className="chat-input-area">
+        {done ? (
+          <button
+            className="primary-btn full"
+            onClick={() => onDone(buildTranscript(scenario, log))}
+          >
+            대화 종료 · 피드백 보기 ➔
           </button>
-        </div>
-      )}
-    </>
+        ) : (
+          <>
+            <div className="turns-hint">남은 대화 {turnsLeft}회</div>
+            <div className="input-row">
+              <input
+                type="text"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="답변을 입력하세요…"
+                disabled={loading}
+              />
+              <button
+                className="primary-btn"
+                onClick={send}
+                disabled={loading || !input.trim()}
+              >
+                전송
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
   );
 }
 
 function Review({ scenario, transcript, onRetry, onHome }) {
   const [data, setData] = useState(null);
-  const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    let cancelled = false;
-    async function run() {
+    let unmounted = false;
+    async function fetchReview() {
       try {
         const res = await fetch("/api/review", {
           method: "POST",
@@ -235,63 +287,73 @@ function Review({ scenario, transcript, onRetry, onHome }) {
         });
         if (!res.ok) throw new Error("review failed");
         const json = await res.json();
-        if (!cancelled) setData(json);
-      } catch (err) {
-        if (!cancelled) setError("피드백을 불러오지 못했어요. 다시 시도해주세요.");
+        if (!unmounted) setData(json);
+      } catch {
+        if (!unmounted) setError("피드백을 생성하지 못했어요.");
       } finally {
-        if (!cancelled) setLoading(false);
+        if (!unmounted) setLoading(false);
       }
     }
-    run();
+    fetchReview();
     return () => {
-      cancelled = true;
+      unmounted = true;
     };
   }, [scenario, transcript]);
 
   if (loading) {
     return (
-      <div className="review-section">
-        <p className="overall-text">코치가 대화를 살펴보고 있어요…</p>
+      <div className="review-loading">
+        <div className="spinner" />
+        <p>코치가 대화를 살펴보고 있어요…</p>
       </div>
     );
   }
 
-  if (error || !data) {
+  if (error) {
     return (
-      <div className="review-section">
-        <div className="error-banner">{error || "피드백을 불러오지 못했어요."}</div>
-        <div className="actions-row" style={{ marginTop: 12 }}>
-          <button className="ghost-btn" onClick={onHome}>
-            처음으로
-          </button>
-        </div>
+      <div className="review-error">
+        <p>{error}</p>
+        <button className="primary-btn" onClick={onHome}>
+          처음으로 돌아가기
+        </button>
       </div>
     );
   }
 
   return (
     <>
-      <div className="review-section">
-        <h2>총평</h2>
-        <p className="overall-text">{data.overall}</p>
+      <div className="review-header">
+        <h1>리허설 리포트</h1>
+        <p className="scenario-sub">
+          {scenario.emoji} {scenario.title}
+        </p>
       </div>
 
-      <div className="review-section">
-        <h2>쨰깍 돌봄 5축</h2>
-        {(data.rubric || []).map((r) => (
-          <div className="rubric-row" key={r.name}>
-            <span className="name">{r.name}</span>
-            <span className="bar-track">
-              <span className="bar-fill" style={{ width: `${(r.score / 5) * 100}%` }} />
-            </span>
-            <span className="score">{r.score}/5</span>
+      {data.overall && (
+        <div className="review-section overall">
+          <h2>총평</h2>
+          <p>{data.overall}</p>
+        </div>
+      )}
+
+      {data.rubric?.length > 0 && (
+        <div className="review-section">
+          <h2>역량 평가</h2>
+          <div className="rubric-grid">
+            {data.rubric.map((r, i) => (
+              <div key={i} className="rubric-row">
+                <span className="name">{r.name}</span>
+                <MoodGauge mood={r.score} />
+                <span className="score">{r.score}/5</span>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
+        </div>
+      )}
 
       {data.strengths?.length > 0 && (
         <div className="review-section">
-          <h2>잘한 점</h2>
+          <h2>좋았던 점</h2>
           {data.strengths.map((s, i) => (
             <div className="feedback-item strength" key={i}>
               <p className="quote">"{s.quote}"</p>
@@ -327,37 +389,42 @@ function Review({ scenario, transcript, onRetry, onHome }) {
     </>
   );
 }
+
 export default function App() {
-  const [currentPath, setCurrentPath] = useState(
-    window.location.pathname.replace(/\/$/, "")
-  );
+  function getNormalizedPath() {
+    const p = window.location.pathname.replace(/\/$/, "");
+    return p === "" ? "/" : p;
+  }
+
+  const [currentPath, setCurrentPath] = useState(getNormalizedPath);
+  const [screen, setScreen] = useState("home");
+  const [scenario, setScenario] = useState(null);
+  const [transcript, setTranscript] = useState("");
+  const [chatKey, setChatKey] = useState(0);
 
   useEffect(() => {
     const onPopState = () => {
-      setCurrentPath(window.location.pathname.replace(/\/$/, ""));
+      const norm = getNormalizedPath();
+      setCurrentPath(norm);
+      if (norm === "/") {
+        setScreen("home");
+        setScenario(null);
+      }
     };
     window.addEventListener("popstate", onPopState);
     return () => window.removeEventListener("popstate", onPopState);
   }, []);
 
   function handleNavigate(path) {
-    window.history.pushState({}, "", path);
-    setCurrentPath(path.replace(/\/$/, ""));
+    const norm = path.replace(/\/$/, "") === "" ? "/" : path.replace(/\/$/, "");
+    window.history.pushState({}, "", norm);
+    setCurrentPath(norm);
+    if (norm === "/") {
+      setScreen("home");
+      setScenario(null);
+    }
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
-
-  if (currentPath === "/contact/matching") {
-    return <MatchingContact onNavigate={handleNavigate} />;
-  }
-
-  if (currentPath === "/contact/closing") {
-    return <ClosingContact onNavigate={handleNavigate} />;
-  }
-
-  const [screen, setScreen] = useState("home");
-  const [scenario, setScenario] = useState(null);
-  const [transcript, setTranscript] = useState("");
-  const [chatKey, setChatKey] = useState(0);
 
   function selectScenario(s) {
     setScenario(s);
@@ -369,6 +436,7 @@ export default function App() {
     setScreen("home");
     setScenario(null);
     setTranscript("");
+    handleNavigate("/");
   }
 
   function finishChat(t) {
@@ -383,26 +451,35 @@ export default function App() {
 
   return (
     <div className="app">
-      {screen === "home" && (
-        <Home onSelect={selectScenario} onNavigate={handleNavigate} />
-      )}
-      {screen === "chat" && scenario && (
-        <Chat
-          key={chatKey}
-          scenario={scenario}
-          onDone={finishChat}
-          onExit={goHome}
-        />
-      )}
-      {screen === "review" && scenario && (
-        <Review
-          scenario={scenario}
-          transcript={transcript}
-          onRetry={retry}
-          onHome={goHome}
-        />
+      <TopNavbar currentPath={currentPath} onNavigate={handleNavigate} />
+
+      {currentPath === "/contact/matching" && <MatchingContact />}
+
+      {currentPath === "/contact/closing" && <ClosingContact />}
+
+      {currentPath === "/" && (
+        <>
+          {(screen === "home" || !scenario) && (
+            <Home onSelect={selectScenario} onNavigate={handleNavigate} />
+          )}
+          {screen === "chat" && scenario && (
+            <Chat
+              key={chatKey}
+              scenario={scenario}
+              onDone={finishChat}
+              onExit={goHome}
+            />
+          )}
+          {screen === "review" && scenario && (
+            <Review
+              scenario={scenario}
+              transcript={transcript}
+              onRetry={retry}
+              onHome={goHome}
+            />
+          )}
+        </>
       )}
     </div>
   );
 }
-

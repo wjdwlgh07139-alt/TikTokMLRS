@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-export default function ClosingContact({ onNavigate }) {
+export default function ClosingContact() {
   const [activity, setActivity] = useState("자동차 주차장 만들기");
   const [content, setContent] = useState(
     "아이가 장난감 자동차에 관심을 보여 주차장 조립 및 놀이 활동을 진행했습니다."
@@ -39,113 +39,74 @@ export default function ClosingContact({ onNavigate }) {
   }
 
   return (
-    <div className="contact-template-container">
-      {onNavigate && (
-        <div className="nav-header">
-          <button
-            type="button"
-            className="nav-back-btn"
-            onClick={() => onNavigate("/")}
-          >
-            ← 째깍 리허설 홈
-          </button>
-          <div className="nav-tab-group">
+    <div className="template-card">
+      <div className="d-eyebrow">보호자 종료 메시지 템플릿</div>
+      <h2 className="d-title">활동 완료 메시지 자동 작성</h2>
+
+      <div className="form-grid">
+        <div className="field full">
+          <label htmlFor="c_activity">활동명</label>
+          <input
+            id="c_activity"
+            type="text"
+            value={activity}
+            onChange={(e) => setActivity(e.target.value)}
+            placeholder="예: 자동차 주차장 만들기"
+          />
+        </div>
+
+        <div className="field full">
+          <label htmlFor="c_content">활동 내용</label>
+          <textarea
+            id="c_content"
+            rows={3}
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            placeholder="아이가 장난감 자동차에 관심을 보여..."
+          />
+        </div>
+
+        <div className="field full">
+          <label>특이사항 여부</label>
+          <div className="pill-group">
             <button
               type="button"
-              className="nav-tab-btn"
-              onClick={() => onNavigate("/contact/matching")}
+              className={`pill ${!hasIssue ? "on" : ""}`}
+              onClick={() => setHasIssue(false)}
             >
-              첫 연락
+              없음
             </button>
             <button
               type="button"
-              className="nav-tab-btn active"
-              onClick={() => onNavigate("/contact/closing")}
+              className={`pill ${hasIssue ? "on" : ""}`}
+              onClick={() => setHasIssue(true)}
             >
-              종료 메시지
+              있음
             </button>
           </div>
         </div>
-      )}
-      <div className="template-card">
-        <div className="template-badge">보호자 종료 메시지 템플릿</div>
-        <h2 className="template-title">활동 완료 메시지 자동 작성</h2>
-        <p className="template-desc">
-          🏁 돌봄 활동 종료 후 보호자에게 전달할 종료 메시지입니다. 간단한 활동 정보를 입력하면 문구가 자동 생성됩니다.
-        </p>
 
-        <div className="form-grid">
+        {hasIssue && (
           <div className="field full">
-            <label htmlFor="c_activity">활동명</label>
-            <input
-              id="c_activity"
-              type="text"
-              value={activity}
-              onChange={(e) => setActivity(e.target.value)}
-              placeholder="예: 자동차 주차장 만들기"
-            />
-          </div>
-
-          <div className="field full">
-            <label htmlFor="c_content">활동 내용</label>
+            <label htmlFor="c_issue">특이사항 내용 (사실 중심으로)</label>
             <textarea
-              id="c_content"
-              rows={3}
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              placeholder="아이가 장난감 자동차에 관심을 보여..."
+              id="c_issue"
+              rows={2}
+              value={issueText}
+              onChange={(e) => setIssueText(e.target.value)}
+              placeholder="예: 예정에 없던 활동 시간 연장 요청이 있어 플랫폼 기준 확인을 안내함"
             />
           </div>
+        )}
+      </div>
 
-          <div className="field full">
-            <label>특이사항 여부</label>
-            <div className="pill-group">
-              <button
-                type="button"
-                className={`pill-btn ${!hasIssue ? "active" : ""}`}
-                onClick={() => setHasIssue(false)}
-              >
-                없음
-              </button>
-              <button
-                type="button"
-                className={`pill-btn ${hasIssue ? "active" : ""}`}
-                onClick={() => setHasIssue(true)}
-              >
-                있음
-              </button>
-            </div>
-          </div>
-
-          {hasIssue && (
-            <div className="field full">
-              <label htmlFor="c_issue">특이사항 내용 (사실 중심으로)</label>
-              <textarea
-                id="c_issue"
-                rows={2}
-                value={issueText}
-                onChange={(e) => setIssueText(e.target.value)}
-                placeholder="예: 예정에 없던 활동 시간 연장 요청이 있어 플랫폼 기준 확인을 안내함"
-              />
-            </div>
-          )}
-        </div>
-
-        <div className="preview-box">
-          <div className="preview-header">
-            <span>미리보기</span>
-            <span className="copy-note">
-              {/* 카카오톡 공유 딥링크 SDK 추가 예정 (현재 단계는 클립보드 복사로 대응) */}
-              💬 문구 복사 후 카카오톡 전송
-            </span>
-          </div>
-          <div className="preview-content">{previewText}</div>
-          <button type="button" className="copy-action-btn" onClick={handleCopy}>
-            📋 문구 복사하기
-          </button>
-        </div>
-
-        {toast && <div className="toast-popup">✅ 클립보드에 복사되었습니다!</div>}
+      <div className="preview">
+        <div className="plabel">미리보기</div>
+        <div className="ptext">{previewText}</div>
+        <button type="button" className="copy-btn" onClick={handleCopy}>
+          문구 복사하기
+        </button>
+        {toast && <div className="toast show">복사했어요</div>}
       </div>
     </div>
   );

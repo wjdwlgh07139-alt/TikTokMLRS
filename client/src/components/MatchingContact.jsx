@@ -25,20 +25,20 @@ const SITUATIONS = {
 
 const TONES = {
   기본: {
-    greet: (v) => `안녕하세요, ${v.name || "선생님"}입니다.`,
+    greet: (v) => `안녕하세요, ${v.name || "김OO"}입니다.`,
     close: "확인해주시면 감사하겠습니다.",
   },
   편한: {
-    greet: (v) => `안녕하세요! ${v.name || "선생님"}이에요 :)`,
+    greet: (v) => `안녕하세요! ${v.name || "김OO"}이에요 :)`,
     close: "편하실 때 답 주세요!",
   },
   정중: {
-    greet: (v) => `안녕하세요, ${v.name || "선생님"} 선생님입니다.`,
+    greet: (v) => `안녕하세요, ${v.name || "김OO"} 선생님입니다.`,
     close: "번거로우시더라도 확인 부탁드립니다.",
   },
 };
 
-export default function MatchingContact({ onNavigate }) {
+export default function MatchingContact() {
   const [situation, setSituation] = useState("매칭 후 첫인사");
   const [name, setName] = useState("김OO");
   const [child, setChild] = useState("OO");
@@ -72,135 +72,94 @@ export default function MatchingContact({ onNavigate }) {
   }
 
   return (
-    <div className="contact-template-container">
-      {onNavigate && (
-        <div className="nav-header">
-          <button
-            type="button"
-            className="nav-back-btn"
-            onClick={() => onNavigate("/")}
+    <div className="template-card">
+      <div className="d-eyebrow">보호자 첫 연락 템플릿</div>
+      <h2 className="d-title">상황 ➔ 정보 입력 ➔ 자동 완성 ➔ 복사</h2>
+
+      <div className="form-grid">
+        <div className="field full">
+          <label htmlFor="p_sit">1. 상황 선택</label>
+          <select
+            id="p_sit"
+            value={situation}
+            onChange={(e) => setSituation(e.target.value)}
           >
-            ← 째깍 리허설 홈
-          </button>
-          <div className="nav-tab-group">
-            <button
-              type="button"
-              className="nav-tab-btn active"
-              onClick={() => onNavigate("/contact/matching")}
-            >
-              첫 연락
-            </button>
-            <button
-              type="button"
-              className="nav-tab-btn"
-              onClick={() => onNavigate("/contact/closing")}
-            >
-              종료 메시지
-            </button>
-          </div>
-        </div>
-      )}
-      <div className="template-card">
-        <div className="template-badge">보호자 첫 연락 템플릿</div>
-        <h2 className="template-title">매칭 직후 첫 연락 문구 작성</h2>
-        <p className="template-desc">
-          💡 첫 매칭 직후 1회 전달하는 메시지입니다. 상황과 정보를 입력하면 문구가 자동 완성됩니다.
-        </p>
-
-        <div className="form-grid">
-          <div className="field full">
-            <label htmlFor="p_sit">1. 상황 선택</label>
-            <select
-              id="p_sit"
-              value={situation}
-              onChange={(e) => setSituation(e.target.value)}
-            >
-              {Object.keys(SITUATIONS).map((k) => (
-                <option key={k} value={k}>
-                  {k}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="field">
-            <label htmlFor="p_name">선생님 이름</label>
-            <input
-              id="p_name"
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="예: 김OO"
-            />
-          </div>
-
-          <div className="field">
-            <label htmlFor="p_child">아이 이름</label>
-            <input
-              id="p_child"
-              type="text"
-              value={child}
-              onChange={(e) => setChild(e.target.value)}
-              placeholder="예: OO"
-            />
-          </div>
-
-          <div className="field">
-            <label htmlFor="p_date">활동 날짜·시간</label>
-            <input
-              id="p_date"
-              type="text"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              placeholder="예: 7월 28일 오후 3시"
-            />
-          </div>
-
-          <div className="field">
-            <label htmlFor="p_ask">
-              확인하고 싶은 사항 <span className="sub-tag">(선택 입력)</span>
-            </label>
-            <input
-              id="p_ask"
-              type="text"
-              value={ask}
-              onChange={(e) => setAsk(e.target.value)}
-              placeholder="예: 간식 제공 여부"
-            />
-          </div>
-
-          <div className="field full">
-            <label>말투 선택</label>
-            <div className="pill-group">
-              {Object.keys(TONES).map((tKey) => (
-                <button
-                  key={tKey}
-                  type="button"
-                  className={`pill-btn ${tone === tKey ? "active" : ""}`}
-                  onClick={() => setTone(tKey)}
-                >
-                  {tKey}
-                </button>
-              ))}
-            </div>
-          </div>
+            {Object.keys(SITUATIONS).map((k) => (
+              <option key={k} value={k}>
+                {k}
+              </option>
+            ))}
+          </select>
         </div>
 
-        <div className="preview-box">
-          <div className="preview-header">
-            <span>미리보기</span>
-            <span className="copy-note">
-              {/* 카카오톡 공유 딥링크 SDK 추가 예정 (현재 단계는 클립보드 복사로 대응) */}
-              💬 문구 복사 후 카카오톡 전송
-            </span>
-          </div>
-          <div className="preview-content">{previewText}</div>
-          <button type="button" className="copy-action-btn" onClick={handleCopy}>
-            📋 문구 복사하기
-          </button>
+        <div className="field">
+          <label htmlFor="p_name">선생님 이름</label>
+          <input
+            id="p_name"
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="예: 김OO"
+          />
         </div>
 
-        {toast && <div className="toast-popup">✅ 클립보드에 복사되었습니다!</div>}
+        <div className="field">
+          <label htmlFor="p_child">아이 이름</label>
+          <input
+            id="p_child"
+            type="text"
+            value={child}
+            onChange={(e) => setChild(e.target.value)}
+            placeholder="예: OO"
+          />
+        </div>
+
+        <div className="field">
+          <label htmlFor="p_date">활동 날짜·시간</label>
+          <input
+            id="p_date"
+            type="text"
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
+            placeholder="예: 7월 28일 오후 3시"
+          />
+        </div>
+
+        <div className="field">
+          <label htmlFor="p_ask">확인하고 싶은 사항</label>
+          <input
+            id="p_ask"
+            type="text"
+            value={ask}
+            onChange={(e) => setAsk(e.target.value)}
+            placeholder="예: 간식 제공 여부"
+          />
+        </div>
+
+        <div className="field full">
+          <label>말투 선택</label>
+          <div className="pill-group">
+            {Object.keys(TONES).map((tKey) => (
+              <button
+                key={tKey}
+                type="button"
+                className={`pill ${tone === tKey ? "on" : ""}`}
+                onClick={() => setTone(tKey)}
+              >
+                {tKey}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="preview">
+        <div className="plabel">미리보기</div>
+        <div className="ptext">{previewText}</div>
+        <button type="button" className="copy-btn" onClick={handleCopy}>
+          문구 복사하기
+        </button>
+        {toast && <div className="toast show">복사했어요</div>}
       </div>
     </div>
   );
