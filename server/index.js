@@ -1,7 +1,13 @@
 import "dotenv/config";
+import path from "path";
+import { fileURLToPath } from "url";
 import express from "express";
 import { GoogleGenAI } from "@google/genai";
 import { PERSONAS, baseSystem, reviewSystem } from "./personas.js";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const distPath = path.join(__dirname, "../client/dist");
 
 // Gemini 모델 문자열은 언제든 바뀔 수 있으므로 상수만 바꾸면 되게 분리해둠.
 // 최신 목록: https://ai.google.dev/gemini-api/docs/models
@@ -19,6 +25,7 @@ if (!process.env.GEMINI_API_KEY) {
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 const app = express();
 app.use(express.json());
+app.use(express.static(distPath));
 
 function extractJSON(text) {
   const cleaned = text.replace(/```json|```/g, "").trim();
@@ -150,6 +157,12 @@ app.post("/api/review", async (req, res) => {
 
 app.get("/api/health", (req, res) => {
   res.json({ ok: true, roleplay: MODEL_ROLEPLAY, review: MODEL_REVIEW });
+});
+
+app.get(["/contact/*", "/contact"], (req, res) => {
+  res.sendFile(path.join(distPath, "index.html"), (err) => {
+    if (err) res.status(404).send("Page not found");
+  });
 });
 
 const PORT = process.env.PORT || 3001;

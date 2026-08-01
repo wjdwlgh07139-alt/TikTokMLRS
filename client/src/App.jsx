@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { SCENARIOS } from "./scenarios.js";
+import MatchingContact from "./components/MatchingContact.jsx";
+import ClosingContact from "./components/ClosingContact.jsx";
 
 const MOOD_LABEL = {
   1: "😟 많이 불안해요",
@@ -301,8 +303,17 @@ function Review({ scenario, transcript, onRetry, onHome }) {
     </>
   );
 }
-
 export default function App() {
+  const path = window.location.pathname.replace(/\/$/, "");
+
+  if (path === "/contact/matching") {
+    return <MatchingContact />;
+  }
+
+  if (path === "/contact/closing") {
+    return <ClosingContact />;
+  }
+
   const [screen, setScreen] = useState("home");
   const [scenario, setScenario] = useState(null);
   const [transcript, setTranscript] = useState("");
@@ -342,3 +353,4 @@ export default function App() {
     </div>
   );
 }
+
