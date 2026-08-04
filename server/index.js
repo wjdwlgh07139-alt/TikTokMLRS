@@ -11,8 +11,8 @@ const distPath = path.join(__dirname, "../client/dist");
 
 // Gemini 모델 문자열은 언제든 바뀔 수 있으므로 상수만 바꾸면 되게 분리해둠.
 // 최신 목록: https://ai.google.dev/gemini-api/docs/models
-const MODEL_ROLEPLAY = "gemini-3.6-flash"; // 저비용·고빈도 역할극용
-const MODEL_REVIEW = "gemini-3.6-flash"; // 평가용. gemini-2.5-pro는 무료 등급 할당량이 0이라 flash로 통일(결제 연결 시 pro로 교체 가능)
+const MODEL_ROLEPLAY = "gemini-3.5-flash-lite"; // 저비용·고빈도 역할극용
+const MODEL_REVIEW = "gemini-3.5-flash-lite"; // 평가용. flash 말고 flash-lite도 은근 쓸만함
 const MAX_TURNS = 3;
 
 if (!process.env.GEMINI_API_KEY) {
@@ -72,7 +72,8 @@ app.post("/api/roleplay", async (req, res) => {
 
     const convo = Array.isArray(messages) ? messages : [];
     const userTurns = convo.filter((m) => m.role === "user").length;
-    const isFinal = userTurns >= MAX_TURNS;
+    const maxTurns = persona.turns || MAX_TURNS;
+    const isFinal = userTurns >= maxTurns;
 
     let system = baseSystem(persona.persona);
     if (isFinal) {
@@ -108,7 +109,7 @@ app.post("/api/roleplay", async (req, res) => {
 
     result.mood = clampMood(result.mood);
     if (isFinal) result.done = true;
-    result.turnsLeft = Math.max(0, MAX_TURNS - userTurns);
+    result.turnsLeft = Math.max(0, maxTurns - userTurns);
 
     res.json(result);
   } catch (err) {
