@@ -32,114 +32,221 @@ function MoodGauge({ mood }) {
   );
 }
 
-function TopNavbar({ currentPath, onNavigate }) {
+function BottomTabBar({ currentPath, onNavigate }) {
   const norm = currentPath === "" ? "/" : currentPath;
 
+  const tabs = [
+    { id: "/", label: "리허설", icon: "🎭" },
+    { id: "/contact/matching", label: "첫 연락", icon: "🤝" },
+    { id: "/contact/closing", label: "종료 메시지", icon: "📝" },
+  ];
+
   return (
-    <header className="main-navbar">
-      <div className="navbar-brand" onClick={() => onNavigate("/")}>
-        <span className="logo-icon">🐣</span>
-        <span className="logo-text">쨰깍 리허설</span>
-      </div>
-      <nav className="navbar-tabs">
-        <button
-          type="button"
-          className={`nav-tab-item ${norm === "/" ? "active" : ""}`}
-          onClick={() => onNavigate("/")}
-        >
-          🎭 리허설
-        </button>
-        <button
-          type="button"
-          className={`nav-tab-item ${norm === "/contact/matching" ? "active" : ""}`}
-          onClick={() => onNavigate("/contact/matching")}
-        >
-          🤝 첫 연락
-        </button>
-        <button
-          type="button"
-          className={`nav-tab-item ${norm === "/contact/closing" ? "active" : ""}`}
-          onClick={() => onNavigate("/contact/closing")}
-        >
-          🏁 종료 메시지
-        </button>
-      </nav>
-    </header>
+    <nav className="bottom-tabbar" aria-label="하단 네비게이션">
+      {tabs.map((tab) => {
+        const isActive = norm === tab.id;
+        return (
+          <button
+            key={tab.id}
+            type="button"
+            className={`bottom-tab-item ${isActive ? "active" : ""}`}
+            onClick={() => onNavigate(tab.id)}
+          >
+            <span className="tab-icon">{tab.icon}</span>
+            <span className="tab-label">{tab.label}</span>
+          </button>
+        );
+      })}
+    </nav>
   );
 }
 
-function Home({ onSelect, onNavigate }) {
-  const children = SCENARIOS.filter((s) => s.group === "child");
-  const parents = SCENARIOS.filter((s) => s.group === "parent");
+
+const LEVEL_LABEL = { easy: "쉬움", mid: "보통", hard: "도전" };
+
+const EXPLAIN = {
+  child:
+    "아이의 반응에 맞춰 다가가는 연습이에요. 정답을 맞히는 게 아니라, 나만의 대응을 편하게 찾아봐요.",
+  parent:
+    "보호자와 신뢰를 쌓는 대화 연습이에요. 어떻게 말을 건네면 좋을지 미리 감을 잡아봐요.",
+};
+
+function LevelDots({ level }) {
+  return (
+    <span className={`lvl ${level}`}>
+      <span className="dots">
+        <span className="dot" />
+        <span className="dot" />
+        <span className="dot" />
+      </span>
+      {LEVEL_LABEL[level] || level}
+    </span>
+  );
+}
+
+function Home({ onSelect }) {
+  const [activeCat, setActiveCat] = useState("child");
+  const [sheetScenario, setSheetScenario] = useState(null);
+
+  const childCount = SCENARIOS.filter((s) => s.group === "child").length;
+  const parentCount = SCENARIOS.filter((s) => s.group === "parent").length;
+
+  const currentScenarios = SCENARIOS.filter((s) => s.group === activeCat);
+
+  useEffect(() => {
+    function handleKeyDown(e) {
+      if (e.key === "Escape") setSheetScenario(null);
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   return (
     <>
       <div className="hero">
-        <h1>🐣 쨰깍 리허설</h1>
-        <p>진짜 만남 전에, 3~4번만 짧게 미리 연습해봐요.</p>
-      </div>
-
-      <div>
-        <div className="group-label">아이와 처음 만나기</div>
-        <div className="card-grid">
-          {children.map((s) => (
-            <ScenarioCard key={s.id} scenario={s} onSelect={onSelect} />
-          ))}
-        </div>
-      </div>
-
-      <div>
-        <div className="group-label">부모님과 대화하기</div>
-        <div className="card-grid">
-          {parents.map((s) => (
-            <ScenarioCard key={s.id} scenario={s} onSelect={onSelect} />
-          ))}
-        </div>
-      </div>
-
-      <div>
-        <div className="group-label">📩 메시지 템플릿 도구</div>
-        <div className="card-grid">
+        <h1>🐣 째깍 리허설</h1>
+        <p className="sub">
+          진짜 만남 전에, 상황 하나를 골라 3~4번만 짧게 미리 연습해봐요.
+        </p>
+        <div className="seg" role="tablist">
           <button
-            type="button"
-            className="scenario-card template-nav-card"
-            onClick={() => onNavigate("/contact/matching")}
+            role="tab"
+            data-cat="child"
+            aria-selected={activeCat === "child"}
+            onClick={() => setActiveCat("child")}
           >
-            <span className="badge template">첫 연락</span>
-            <div className="title">🤝 보호자 첫 연락 템플릿</div>
-            <div className="desc">상황·말투별 첫인사 문구 생성</div>
+            아이와 만나기 <span className="cnt">{childCount}</span>
           </button>
           <button
-            type="button"
-            className="scenario-card template-nav-card"
-            onClick={() => onNavigate("/contact/closing")}
+            role="tab"
+            data-cat="parent"
+            aria-selected={activeCat === "parent"}
+            onClick={() => setActiveCat("parent")}
           >
-            <span className="badge template">종료 메시지</span>
-            <div className="title">🏁 활동 완료 메시지 템플릿</div>
-            <div className="desc">활동 결과 및 특이사항 요약</div>
+            부모님과 대화 <span className="cnt">{parentCount}</span>
           </button>
         </div>
+      </div>
+
+      <div className="explain">{EXPLAIN[activeCat]}</div>
+
+      <div key={activeCat} className="rehearsal-list swap">
+        {currentScenarios.map((s) => (
+          <button
+            key={s.id}
+            className="card"
+            data-cat={s.group}
+            data-id={s.id}
+            aria-label={`${s.title} 연습 상세 보기`}
+            onClick={() => setSheetScenario(s)}
+          >
+            <div className="c-top">
+              <div className="avatar">{s.emoji}</div>
+              <div className="c-main">
+                <div className="c-title">{s.title}</div>
+                <div className="c-situation">{s.situation}</div>
+              </div>
+              <div className="c-right">
+                <span className="age">
+                  {s.group === "child" ? "아이" : "보호자"}
+                </span>
+                <span className="chev">›</span>
+              </div>
+            </div>
+
+            {s.tags && s.tags.length > 0 && (
+              <div className="tags">
+                {s.tags.map((t, idx) => (
+                  <span key={idx} className="tag">
+                    연습 · <b>{t}</b>
+                  </span>
+                ))}
+              </div>
+            )}
+
+            <div className="c-meta">
+              <LevelDots level={s.level} />
+              <span className="sep">·</span>
+              <span>약 3분</span>
+              <span className="sep">·</span>
+              <span>{s.turns}턴 대화</span>
+              <span className="start">연습 시작 →</span>
+            </div>
+          </button>
+        ))}
+      </div>
+
+      {/* Bottom Sheet Drawer Modal */}
+      <div
+        className={`scrim ${sheetScenario ? "open" : ""}`}
+        onClick={(e) => {
+          if (e.target.classList.contains("scrim")) setSheetScenario(null);
+        }}
+      >
+        {sheetScenario && (
+          <div
+            className="sheet"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="sheetTitle"
+          >
+            <div className="grab" />
+            <div className="sheet-head">
+              <div
+                className="avatar"
+                style={{
+                  background:
+                    sheetScenario.group === "child"
+                      ? "var(--child-soft)"
+                      : "var(--parent-soft)",
+                }}
+              >
+                {sheetScenario.emoji}
+              </div>
+              <div>
+                <h2 id="sheetTitle">{sheetScenario.title}</h2>
+                <div className="sh-age">
+                  {(sheetScenario.group === "child" ? "아이" : "보호자") +
+                    " · " +
+                    (sheetScenario.situation || "").replace(/[.]$/, "")}
+                </div>
+              </div>
+            </div>
+            <p className="sheet-sit">
+              이번 연습에서는{" "}
+              {sheetScenario.tags ? sheetScenario.tags.join(", ") : ""}에
+              집중해요. 편하게 대답하면 돼요.
+            </p>
+            <div className="sheet-meta">
+              <span className="meta-chip">🕒 약 3분</span>
+              <span className="meta-chip">💬 {sheetScenario.turns}턴 대화</span>
+              <span className="meta-chip">
+                난이도 {LEVEL_LABEL[sheetScenario.level] || sheetScenario.level}
+              </span>
+            </div>
+            <button
+              className="start-btn"
+              onClick={() => {
+                const targetScenario = sheetScenario;
+                setSheetScenario(null);
+                onSelect(targetScenario);
+              }}
+            >
+              연습 시작
+            </button>
+            <button
+              className="close-btn"
+              onClick={() => setSheetScenario(null)}
+            >
+              닫기
+            </button>
+          </div>
+        )}
       </div>
     </>
   );
 }
 
-function ScenarioCard({ scenario, onSelect }) {
-  return (
-    <button
-      className={`scenario-card ${scenario.group}`}
-      onClick={() => onSelect(scenario)}
-    >
-      <span className={`badge ${scenario.group}`}>
-        {scenario.group === "child" ? "아이" : "학부모"}
-        {scenario.age ? ` · ${scenario.age}` : ""}
-      </span>
-      <div className="card-emoji">{scenario.emoji}</div>
-      <div className="card-title">{scenario.title}</div>
-      <div className="card-tag">{scenario.tag}</div>
-    </button>
-  );
-}
 
 function Chat({ scenario, onDone, onExit }) {
   const [log, setLog] = useState([
@@ -451,8 +558,6 @@ export default function App() {
 
   return (
     <div className="app">
-      <TopNavbar currentPath={currentPath} onNavigate={handleNavigate} />
-
       {currentPath === "/contact/matching" && <MatchingContact />}
 
       {currentPath === "/contact/closing" && <ClosingContact />}
@@ -480,6 +585,8 @@ export default function App() {
           )}
         </>
       )}
+
+      <BottomTabBar currentPath={currentPath} onNavigate={handleNavigate} />
     </div>
   );
 }

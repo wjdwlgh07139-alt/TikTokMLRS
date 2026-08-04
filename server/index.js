@@ -17,7 +17,7 @@ const MAX_TURNS = 3;
 
 if (!process.env.GEMINI_API_KEY) {
   console.error(
-    "[쨰깍 리허설] GEMINI_API_KEY가 설정되지 않았습니다. .env 파일에 키를 넣어주세요 (.env.example 참고)."
+    "[째깍 리허설] GEMINI_API_KEY가 설정되지 않았습니다. .env 파일에 키를 넣어주세요 (.env.example 참고)."
   );
   process.exit(1);
 }
@@ -167,6 +167,5 @@ app.get(["/contact/*", "/contact"], (req, res) => {
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
-  console.log(`[쨰깍 리허설] server listening on http://localhost:${PORT}`);
+  console.log(`[째깍 리허설] server listening on http://localhost:${PORT}`);
 });
-

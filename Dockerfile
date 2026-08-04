@@ -1,24 +1,23 @@
-# --- 1단계: 빌드 스테이지 ---
-FROM node:20-alpine AS build
+FROM node:20-alpine
+
 WORKDIR /app
+
+# 1. 루트 및 client 패키지 파일 미리 복사 (postinstall 정상 동작을 위해)
 COPY package*.json ./
+COPY client/package*.json ./client/
+
+# 2. 의존성 패키지 설치
 RUN npm install
+
+# 3. 전체 소스 코드 복사
 COPY . .
 
-# 만약 Gemini API 키를 환경변수로 주입해야 한다면 빌드 시점에 넣어줍니다.
-# (Vite 기준: VITE_로 시작해야 프론트엔드 코드에서 인식합니다.)
-ARG VITE_GEMINI_API_KEY
-ENV VITE_GEMINI_API_KEY=$VITE_GEMINI_API_KEY
+# 4. 프론트엔드 React 앱 빌드 (client/dist 생성)
+RUN npm --prefix client run build
 
-RUN npm run build
+# 5. 외부 노출 포트
+EXPOSE 3001
 
-# --- 2단계: 실행 스테이지 (경량 Nginx) ---
-FROM nginx:alpine
-# 빌드된 결과물만 Nginx의 웹 루트 폴더로 복사
-COPY --from=build /app/dist /usr/share/nginx/html
-
-# React Router(SPA)를 사용할 때 404 에러를 방지하기 위한 Nginx 설정
-RUN echo 'server { listen 80; location / { root /usr/share/nginx/html; index index.html index.htm; try_files $uri $uri/ /index.html; } }' > /etc/nginx/conf.d/default.conf
-
-EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
+# 6. Express 서버 실행
+CMD ["npm", "run", "server"]
+
