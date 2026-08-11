@@ -1,118 +1,184 @@
-// 화면 표시용 메타데이터만 포함합니다. 실제 인물 연기 지시문(persona)은 서버에만 존재합니다.
-export const SCENARIOS = [
+// 서버 personas.js API 통신 모듈 및 Fallback 데이터
+export async function fetchScenarios() {
+  try {
+    const res = await fetch("/api/scenarios");
+    if (!res.ok) throw new Error("fetch scenarios failed");
+    return await res.json();
+  } catch (err) {
+    console.warn("Using fallback scenarios", err);
+    return SCENARIOS_FALLBACK;
+  }
+}
+
+export const SCENARIOS_FALLBACK = [
+  {
+    id: "cheerful",
+    group: "child",
+    emoji: "☀️",
+    title: "활발하고 잘 노는 아이",
+    situation: "첫 방문 직후. 먼저 인사하고 제안에 즉각 호응해요.",
+    tags: ["기본 절차", "성공 경험"],
+    level: "easy",
+    turns: 3,
+    initialLevel: 0,
+    openingLine: "선생님 안녕하세요! 오늘 저랑 뭐 하고 놀 거예요? 저 블록 완전 좋아해요!",
+    feedbackType: "silent",
+    secondaryTraits: []
+  },
+  {
+    id: "quiet",
+    group: "child",
+    emoji: "😶",
+    title: "지나치게 조용한 아이",
+    situation: "첫 방문 15분 경과, 부모 외출. '네·몰라요'로만 답하고 표정 변화가 없어요.",
+    tags: ["열린 질문", "관심사 추적"],
+    level: "mid",
+    turns: 5,
+    initialLevel: 2,
+    openingLine: "(선생님 시선을 피하고 바닥을 보며) …네. 몰라요.",
+    feedbackType: "silent",
+    secondaryTraits: []
+  },
+  {
+    id: "attached",
+    group: "child",
+    emoji: "🐥",
+    title: "과하게 들러붙는 아이",
+    situation: "두 번째 방문. 계속 안기고 '이거 봐요' 반복. 부모 요청 활동을 시작하지 못해요.",
+    tags: ["애정 수용", "활동 전환"],
+    level: "hard",
+    turns: 4,
+    initialLevel: 0,
+    openingLine: "(선생님 팔에 찰싹 붙으며) 선생님! 이것도 봐요! 나 예쁘죠? 계속 나만 봐요!",
+    feedbackType: "signal",
+    secondaryTraits: []
+  },
+  {
+    id: "why",
+    group: "child",
+    emoji: "❓",
+    title: "\"왜요?\" 공세 아이",
+    situation: "방문 30분 경과. 모든 발화가 꼬리 질문이며 난이도가 답할 수 없는 영역까지 올라가요.",
+    tags: ["솔직한 인정", "함께 탐구"],
+    level: "mid",
+    turns: 4,
+    initialLevel: 0,
+    openingLine: "선생님, 하늘은 왜 파래요? 그럼 왜 밤에는 검은색이에요? 왜요?",
+    feedbackType: "silent",
+    secondaryTraits: []
+  },
   {
     id: "shy",
     group: "child",
     emoji: "🙈",
-    title: "수줍음 타는 아이",
-    situation: "낯을 많이 가리고 쉽게 다가오지 않아요.",
+    title: "낯가리는 아이",
+    situation: "어린이집에서 처음 만난 아이. 엄마 뒤에 반쯤 숨어 있고 눈을 잘 마주치지 않아요.",
     tags: ["서두르지 않기", "경계 낮추기"],
     level: "mid",
     turns: 4,
-    mood0: 2,
-    setup:
-      "어린이집에서 처음 만난 아이. 엄마 뒤에 반쯤 숨어 있고 눈을 잘 마주치지 않아요. 말을 걸어도 대답이 짧아요. 억지로 다가가면 더 움츠러듭니다.",
-    opening: "…(엄마 다리 뒤로 반쯤 숨어서 선생님을 힐끔 본다)",
+    initialLevel: 2,
+    openingLine: "…(엄마 옷자락을 잡고 반쯤 숨어 선생님을 힐끔 본다)",
+    feedbackType: "signal",
+    secondaryTraits: ["sensitive"]
   },
   {
     id: "cling",
     group: "child",
     emoji: "🥺",
     title: "엄마를 찾는 아이",
-    situation: "엄마와 떨어져 불안해하며 울먹여요.",
+    situation: "엄마가 방금 나갔어요. 아이가 울먹이며 '엄마 언제 와'를 반복합니다.",
     tags: ["분리불안 달래기", "정서 안정"],
     level: "mid",
     turns: 4,
-    mood0: 1,
-    setup:
-      "엄마가 방금 나갔어요. 아이가 울먹이며 '엄마 언제 와'를 반복합니다. 달래는 방식에 따라 진정되거나 더 크게 웁니다.",
-    opening: "엄마 어디 갔어요… 엄마 언제 와요? (훌쩍)",
+    initialLevel: 2,
+    openingLine: "엄마 어디 갔어요… 엄마 언제 와요? (훌쩍)",
+    feedbackType: "signal",
+    secondaryTraits: []
   },
   {
     id: "hyper",
     group: "child",
     emoji: "🌀",
     title: "산만한 아이",
-    situation: "한곳에 집중하지 못하고 계속 움직여요.",
+    situation: "한곳에 집중하지 못하고 계속 움직여요. 재미있는 활동을 제안하면 흥미를 옮깁니다.",
     tags: ["에너지 맞추기", "집중 유도"],
     level: "mid",
     turns: 4,
-    mood0: 3,
-    setup:
-      "한 가지에 오래 집중하지 못하고 계속 다른 걸로 넘어가요. 재미있는 활동을 제안하면 금방 흥미를 옮깁니다. 억누르면 튕겨나갑니다.",
-    opening: "이거 뭐예요? 저 저거 갖고 싶어요! 우리 뛰어놀면 안 돼요?",
+    initialLevel: 0,
+    openingLine: "이거 뭐예요? 저 저거 갖고 싶어요! 우리 뛰어놀면 안 돼요?",
+    feedbackType: "signal",
+    secondaryTraits: []
   },
   {
     id: "stubborn",
     group: "child",
     emoji: "😤",
     title: "고집부리는 아이",
-    situation: "뜻대로 안 되면 떼를 쓰고 버텨요.",
+    situation: "무엇을 제안해도 '싫어, 안 해'. 선택권을 주면 마음이 열려요.",
     tags: ["선택권 주기", "감정 읽기"],
     level: "hard",
     turns: 4,
-    mood0: 2,
-    setup:
-      "무엇을 제안해도 '싫어, 안 해'. 정면으로 강요하거나 다그치면 더 반발합니다. 스스로 고른다는 느낌을 주면 마음이 열려요.",
-    opening: "싫어. 그거 안 할 거야.",
+    initialLevel: 1,
+    openingLine: "싫어. 그거 안 할 거야.",
+    feedbackType: "signal",
+    secondaryTraits: ["achiever"]
   },
   {
     id: "rough",
     group: "child",
     emoji: "⚡",
     title: "터프한 아이",
-    situation: "거칠게 행동하고 부딪히려 해요.",
+    situation: "뜻대로 안 되면 소리치고 거칠어져요. 장난감을 던지려 합니다.",
     tags: ["안전 우선", "감정 읽기"],
     level: "hard",
     turns: 4,
-    mood0: 1,
-    setup:
-      "뜻대로 안 되면 소리치고 거칠어져요. 장난감을 던지려 하고 거칠게 굽니다. 말리거나 겁주면 더 격해집니다. 안전을 지키면서 감정을 갈래주어야 해요.",
-    opening: "(블록을 집어 던지려 한다) 다 싫어! 저리 가!",
+    initialLevel: 1,
+    openingLine: "(블록을 집어 던지려 한다) 다 싫어! 저리 가!",
+    feedbackType: "signal",
+    secondaryTraits: ["sensitive"]
   },
   {
     id: "first",
     group: "parent",
     emoji: "🤝",
     title: "불안한 첫 만남",
-    situation: "보호자가 걱정이 많고 조심스러워해요.",
+    situation: "처음 방문한 집. 엄마가 경험과 신뢰를 확인하고 싶어해요.",
     tags: ["신뢰 형성", "부드러운 어조"],
     level: "mid",
     turns: 3,
-    mood0: 2,
-    setup:
-      "처음 방문한 집. 엄마가 아이를 믿을 수 있는 선생님에게 맡기는 게 걱정돼 보여요. '선생님이시라던데 저희 애 봐본 적 있어요?' 같은 질문을 조심스럽게 던집니다.",
-    opening:
-      "안녕하세요… 처음 뵙는 거라 걱정이 좀 많았어요. 저희 애가 낯을 좀 가려서요. 혹시… 아이 돌봐본 경험이 있으세요?",
+    initialLevel: 1,
+    openingLine: "안녕하세요… 처음 뵙는 거라 걱정이 좀 많았어요. 혹시 아이 돌봐본 경험이 있으세요?",
+    feedbackType: "signal",
+    secondaryTraits: []
   },
   {
     id: "report",
     group: "parent",
     emoji: "📝",
     title: "하루 보고",
-    situation: "활동이 끝나고 오늘 하루를 전해야 해요.",
+    situation: "하원 후 보호자가 오늘 아이가 어떻게 지냈는지 구체적으로 알고 싶어해요.",
     tags: ["관찰 전달", "소통"],
     level: "easy",
     turns: 3,
-    mood0: 3,
-    setup:
-      "하원이 끝나고 엄마가 데리러 왔어요. 오늘 아이가 어떻게 지냈는지 궁금해합니다. 대충 '잘 지냈어요'만 하면 실망하고, 구체적이면 신뢰가 쌓입니다.",
-    opening: "오늘 어땠어요? 우리 애가 잘 지냈어요? 밥은 잘 먹었나요?",
+    initialLevel: 0,
+    openingLine: "오늘 어땠어요? 우리 애가 잘 지냈어요? 밥은 잘 먹었나요?",
+    feedbackType: "signal",
+    secondaryTraits: []
   },
   {
     id: "grill",
     group: "parent",
     emoji: "🔍",
     title: "꼼꼼한 부모의 질문",
-    situation: "알러지, 비상연락, 간식 규칙을 꼼꼼히 확인해요.",
+    situation: "알러지, 비상연락, 간식, 미디어 규칙을 꼼꼼히 확인해요.",
     tags: ["안전·약속", "침착함"],
     level: "hard",
     turns: 3,
-    mood0: 3,
-    setup:
-      "알러지, 비상연락, 간식, 미디어 규칙까지 꼼꼼히 확인하는 부모님. 얼버무리면 불안해하고, 침착하게 확인하고 메모하면 안심합니다.",
-    opening:
-      "몇 가지만 확인할게요. 아이가 견과류 알러지가 있어요. 그리고 혹시 급한 일 생기면 연락은 어떻게 하죠? TV도 잘 보여주셔야 하는데…",
-  },
+    initialLevel: 1,
+    openingLine: "몇 가지만 확인할게요. 아이가 견과류 알러지가 있어요. 비상연락이나 미디어 규칙은 알고 계시죠?",
+    feedbackType: "signal",
+    secondaryTraits: []
+  }
 ];
 
+export const SCENARIOS = SCENARIOS_FALLBACK;

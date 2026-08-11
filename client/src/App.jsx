@@ -2,6 +2,10 @@ import { useEffect, useRef, useState } from "react";
 import { SCENARIOS } from "./scenarios.js";
 import MatchingContact from "./components/MatchingContact.jsx";
 import ClosingContact from "./components/ClosingContact.jsx";
+import TraitSelectorModal from "./components/TraitSelectorModal.jsx";
+import TraitTipCard from "./components/TraitTipCard.jsx";
+import BlindGuessModal from "./components/BlindGuessModal.jsx";
+import { MAX_USER_INPUT_CHARS, WARN_USER_INPUT_CHARS, WARN_INPUT_MESSAGE } from "./constants.js";
 
 const MOOD_LABEL = {
   1: "😟 많이 불안해요",
@@ -17,8 +21,20 @@ function speakerLabel(scenario, role) {
 }
 
 function buildTranscript(scenario, log) {
+  let userTurnCount = 0;
   return log
-    .map((m) => `${speakerLabel(scenario, m.role)}: ${m.content}`)
+    .map((m) => {
+      if (m.role === "user") {
+        userTurnCount++;
+        return `[${userTurnCount}턴] 선생님: ${m.content}`;
+      } else {
+        if (userTurnCount === 0) {
+          return `[오프닝] 아이: ${m.content}`;
+        } else {
+          return `[${userTurnCount}턴 아이 반응] 아이: ${m.content}`;
+        }
+      }
+    })
     .join("\n");
 }
 
@@ -60,7 +76,6 @@ function BottomTabBar({ currentPath, onNavigate }) {
   );
 }
 
-
 const LEVEL_LABEL = { easy: "쉬움", mid: "보통", hard: "도전" };
 
 const EXPLAIN = {
@@ -86,19 +101,84 @@ function LevelDots({ level }) {
 function Home({ onSelect }) {
   const [activeCat, setActiveCat] = useState("child");
   const [sheetScenario, setSheetScenario] = useState(null);
+  const [traitSelectingScenario, setTraitSelectingScenario] = useState(null);
 
   const childCount = SCENARIOS.filter((s) => s.group === "child").length;
   const parentCount = SCENARIOS.filter((s) => s.group === "parent").length;
-
   const currentScenarios = SCENARIOS.filter((s) => s.group === activeCat);
 
   useEffect(() => {
     function handleKeyDown(e) {
-      if (e.key === "Escape") setSheetScenario(null);
+      if (e.key === "Escape") {
+        setSheetScenario(null);
+        setTraitSelectingScenario(null);
+      }
     }
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
+
+  const handleStartScenario = async (targetScenario) => {
+    setSheetScenario(null);
+    if (targetScenario.secondaryTraits && targetScenario.secondaryTraits.length > 0) {
+      setTraitSelectingScenario(targetScenario);
+    } else {
+      // 보조 성향이 없으면 직행
+      try {
+        const res = await fetch("/api/rehearsal/session", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            scenarioId: targetScenario.id,
+            blindMode: false,
+          }),
+        });
+        const data = await res.json();
+        onSelect(targetScenario, {
+          sessionId: data.sessionId,
+          trait: null,
+          blindMode: false,
+          openingLine: data.openingLine,
+          initialLevel: data.initialLevel,
+        });
+      } catch {
+        onSelect(targetScenario, { sessionId: null, trait: null, blindMode: false });
+      }
+    }
+  };
+
+  const handleTraitConfirm = async ({ traitId, blindMode }) => {
+    const targetScenario = traitSelectingScenario;
+    setTraitSelectingScenario(null);
+
+    try {
+      const res = await fetch("/api/rehearsal/session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          scenarioId: targetScenario.id,
+          traitId,
+          blindMode,
+        }),
+      });
+      const data = await res.json();
+      onSelect(targetScenario, {
+        sessionId: data.sessionId,
+        trait: data.trait || null,
+        blindMode,
+        traitId,
+        openingLine: data.openingLine || data.trait?.openingLine,
+        initialLevel: data.initialLevel ?? data.trait?.initialLevel,
+      });
+    } catch {
+      onSelect(targetScenario, {
+        sessionId: null,
+        trait: null,
+        blindMode,
+        traitId,
+      });
+    }
+  };
 
   return (
     <>
@@ -225,13 +305,11 @@ function Home({ onSelect }) {
             </div>
             <button
               className="start-btn"
-              onClick={() => {
-                const targetScenario = sheetScenario;
-                setSheetScenario(null);
-                onSelect(targetScenario);
-              }}
+              onClick={() => handleStartScenario(sheetScenario)}
             >
-              연습 시작
+              {sheetScenario.secondaryTraits && sheetScenario.secondaryTraits.length > 0
+                ? "성향 선택 / 연습 시작 →"
+                : "연습 시작 →"}
             </button>
             <button
               className="close-btn"
@@ -242,21 +320,40 @@ function Home({ onSelect }) {
           </div>
         )}
       </div>
+
+      {/* Trait Selector Modal */}
+      {traitSelectingScenario && (
+        <TraitSelectorModal
+          scenario={traitSelectingScenario}
+          onConfirm={handleTraitConfirm}
+          onClose={() => setTraitSelectingScenario(null)}
+        />
+      )}
     </>
   );
 }
 
+function Chat({ scenario, sessionInfo, onDone, onExit }) {
+  const { sessionId, trait, blindMode, traitId, openingLine, initialLevel } = sessionInfo || {};
 
-function Chat({ scenario, onDone, onExit }) {
+  const initialMood = initialLevel !== null && initialLevel !== undefined
+    ? Math.max(1, Math.min(5, 4 - initialLevel))
+    : scenario.mood0;
+
+  const initialOpening = openingLine || scenario.opening;
+
   const [log, setLog] = useState([
-    { role: "assistant", content: scenario.opening },
+    { role: "assistant", content: initialOpening },
   ]);
-  const [mood, setMood] = useState(scenario.mood0);
-  const [turnsLeft, setTurnsLeft] = useState(3);
+  const [mood, setMood] = useState(initialMood);
+  const [turnsLeft, setTurnsLeft] = useState(scenario.turns || 3);
   const [done, setDone] = useState(false);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showGuessModal, setShowGuessModal] = useState(false);
+  const [fetchedActualTrait, setFetchedActualTrait] = useState(null);
+
   const logEndRef = useRef(null);
 
   useEffect(() => {
@@ -282,7 +379,12 @@ function Chat({ scenario, onDone, onExit }) {
       const res = await fetch("/api/roleplay", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ scenarioId: scenario.id, messages: apiMessages }),
+        body: JSON.stringify({
+          scenarioId: scenario.id,
+          sessionId,
+          traitId,
+          messages: apiMessages,
+        }),
       });
 
       if (!res.ok) throw new Error("server error");
@@ -306,6 +408,45 @@ function Chat({ scenario, onDone, onExit }) {
     }
   }
 
+  const handleFinishClick = async () => {
+    const transcriptText = buildTranscript(scenario, log);
+    if (blindMode) {
+      // 블라인드 모드인 경우 정답 성향을 받아와 Guess Modal 오픈
+      try {
+        const res = await fetch("/api/review", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            title: scenario.title,
+            transcript: transcriptText,
+            sessionId,
+            traitId,
+          }),
+        });
+        if (res.ok) {
+          const json = await res.json();
+          setFetchedActualTrait(json.actualTrait || null);
+        }
+      } catch {
+        // fallback
+      }
+      setShowGuessModal(true);
+    } else {
+      onDone(transcriptText, { sessionId, traitId, trait });
+    }
+  };
+
+  const handleGuessComplete = (guessResult) => {
+    setShowGuessModal(false);
+    const transcriptText = buildTranscript(scenario, log);
+    onDone(transcriptText, {
+      sessionId,
+      traitId,
+      trait: fetchedActualTrait,
+      guessResult,
+    });
+  };
+
   return (
     <div className="chat-container">
       <div className="chat-header">
@@ -318,6 +459,8 @@ function Chat({ scenario, onDone, onExit }) {
         </div>
         <MoodGauge mood={mood} />
       </div>
+
+      {!blindMode && trait && <TraitTipCard trait={trait} />}
 
       <div className="scenario-banner">
         <p className="mood-text">{MOOD_LABEL[mood] || ""}</p>
@@ -344,18 +487,26 @@ function Chat({ scenario, onDone, onExit }) {
 
       <div className="chat-input-area">
         {done ? (
-          <button
-            className="primary-btn full"
-            onClick={() => onDone(buildTranscript(scenario, log))}
-          >
-            대화 종료 · 피드백 보기 ➔
+          <button className="primary-btn full" onClick={handleFinishClick}>
+            {blindMode ? "대화 종료 · 성향 추측하기 🎲" : "대화 종료 · 피드백 보기 ➔"}
           </button>
         ) : (
           <>
-            <div className="turns-hint">남은 대화 {turnsLeft}회</div>
+            <div className="turns-hint-bar">
+              <span className="turns-hint">남은 대화 {turnsLeft}회</span>
+              <span className={`char-counter ${input.length >= WARN_USER_INPUT_CHARS ? "warn" : ""}`}>
+                {input.length} / {MAX_USER_INPUT_CHARS}자
+              </span>
+            </div>
+            {input.length >= WARN_USER_INPUT_CHARS && (
+              <div className="char-warn-banner">
+                💡 {WARN_INPUT_MESSAGE}
+              </div>
+            )}
             <div className="input-row">
               <input
                 type="text"
+                maxLength={MAX_USER_INPUT_CHARS}
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
@@ -373,14 +524,51 @@ function Chat({ scenario, onDone, onExit }) {
           </>
         )}
       </div>
+
+      {showGuessModal && (
+        <BlindGuessModal
+          actualTrait={fetchedActualTrait}
+          log={log}
+          onComplete={handleGuessComplete}
+        />
+      )}
     </div>
   );
 }
 
-function Review({ scenario, transcript, onRetry, onHome }) {
+function LevelTrajectoryChart({ history }) {
+  if (!history || history.length === 0) return null;
+  const levelLabels = { 0: "0 (편안)", 1: "1 (조심)", 2: "2 (위축)", 3: "3 (거부)" };
+
+  return (
+    <div className="review-section level-trajectory">
+      <h2>📈 아이의 감정 궤적 (내부 레벨)</h2>
+      <p className="section-desc">겉으로 협조적이어도 마음의 닫힘 정도는 다를 수 있어요:</p>
+      <div className="trajectory-bars">
+        {history.map((h, i) => (
+          <div key={i} className="tr-bar-item">
+            <span className="tr-turn">{h.turn === 0 ? "오프닝" : `${h.turn}턴`}</span>
+            <div className="tr-track">
+              <div
+                className={`tr-fill lvl-${h.level}`}
+                style={{ width: `${((h.level + 1) / 4) * 100}%` }}
+              >
+                {levelLabels[h.level] || `Level ${h.level}`}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function Review({ scenario, transcript, extraInfo, onRetry, onHome }) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  const { sessionId, traitId, guessResult } = extraInfo || {};
 
   useEffect(() => {
     let unmounted = false;
@@ -389,7 +577,12 @@ function Review({ scenario, transcript, onRetry, onHome }) {
         const res = await fetch("/api/review", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ title: scenario.title, transcript }),
+          body: JSON.stringify({
+            title: scenario.title,
+            transcript,
+            sessionId,
+            traitId,
+          }),
         });
         if (!res.ok) throw new Error("review failed");
         const json = await res.json();
@@ -404,7 +597,7 @@ function Review({ scenario, transcript, onRetry, onHome }) {
     return () => {
       unmounted = true;
     };
-  }, [scenario, transcript]);
+  }, [scenario, transcript, sessionId, traitId]);
 
   if (loading) {
     return (
@@ -426,14 +619,39 @@ function Review({ scenario, transcript, onRetry, onHome }) {
     );
   }
 
+  const actualTrait = data?.actualTrait;
+  const isCheerful = scenario.id === "cheerful";
+
   return (
     <>
       <div className="review-header">
         <h1>리허설 리포트</h1>
         <p className="scenario-sub">
           {scenario.emoji} {scenario.title}
+          {actualTrait && <span className="trait-badge"> · {actualTrait.label}</span>}
         </p>
       </div>
+
+      {/* 조기 종료 배너 */}
+      {data.isEarlyTermination && (
+        <div className="early-termination-banner">
+          <span className="icon">⚠️</span>
+          <div className="text">
+            <b>목표 턴 수({data.targetTurns}턴)에 도달하기 전에 대화가 종료되었습니다.</b>
+            <p>역량 평가 점수가 생략되며, 대화 내용과 감정 변화 궤적을 중심으로 확인하세요.</p>
+          </div>
+        </div>
+      )}
+
+      {guessResult && (
+        <div className={`guess-summary-card ${guessResult.isCorrect ? "success" : "miss"}`}>
+          <span className="icon">{guessResult.isCorrect ? "🎯" : "💡"}</span>
+          <div>
+            <b>블라인드 모드 추측 결과: {guessResult.isCorrect ? "정답!" : "오답"}</b>
+            <p>실제 아이 성향: {actualTrait?.label || "비밀"}</p>
+          </div>
+        </div>
+      )}
 
       {data.overall && (
         <div className="review-section overall">
@@ -442,15 +660,131 @@ function Review({ scenario, transcript, onRetry, onHome }) {
         </div>
       )}
 
-      {data.rubric?.length > 0 && (
+      {/* 대화 발화 분석 (길이 & 점유 비율) */}
+      {data.utteranceStats && (
+        <div className="review-section utterance-stats">
+          <h2>💬 대화 발화 분석 (길이 & 점유 비율)</h2>
+          <p className="section-desc">한 번에 긴 발화를 하면 아이가 부담을 느껴 마음을 닫을 수 있습니다:</p>
+          <div className="stats-comparison-grid">
+            <div className="stat-card teacher">
+              <div className="st-role">선생님 발화</div>
+              <div className="st-ratio">{data.utteranceStats.teacherRatio}%</div>
+              <div className="st-avg">평균 <b>{data.utteranceStats.teacherAvgLen}자</b> / 턴</div>
+            </div>
+            <div className="stat-card child">
+              <div className="st-role">아이 반응</div>
+              <div className="st-ratio">{data.utteranceStats.childRatio}%</div>
+              <div className="st-avg">평균 <b>{data.utteranceStats.childAvgLen}자</b> / 턴</div>
+            </div>
+          </div>
+          <div className="ratio-bar-track">
+            <div className="ratio-bar teacher" style={{ width: `${data.utteranceStats.teacherRatio}%` }}>
+              선생님 {data.utteranceStats.teacherRatio}%
+            </div>
+            <div className="ratio-bar child" style={{ width: `${data.utteranceStats.childRatio}%` }}>
+              아이 {data.utteranceStats.childRatio}%
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 감정 궤적 차트 */}
+      {data.levelHistory?.length > 0 && (
+        <LevelTrajectoryChart history={data.levelHistory} />
+      )}
+
+      {/* silent 유형: 상호작용 누락 체크리스트 */}
+      {data.feedbackType === "silent" && data.checklists?.length > 0 && (
+        <div className="review-section silent-checklists">
+          <h2>🔍 상호작용 체크리스트</h2>
+          <p className="section-desc">아이가 부정 신호를 주지 않더라도 체크해야 할 핵심 요소입니다:</p>
+          <div className="checklist-grid">
+            {data.checklists.map((c, i) => (
+              <div key={i} className="checklist-item">
+                <span className="chk-icon">✅</span>
+                <span className="chk-label">{c.label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* signal 유형: 실패 트리거 감지 결과 */}
+      {data.feedbackType === "signal" && data.triggeredFails?.length > 0 && (
+        <div className="review-section fail-triggers">
+          <h2>⚠️ 실패 트리거 감지</h2>
+          <p className="section-desc">대화 중 아이가 위축되거나 반응이 돌아선 순간입니다:</p>
+          {data.triggeredFails.map((ft, i) => (
+            <div key={i} className="fail-trigger-card">
+              <div className="ft-header">
+                <span className="turn-tag">{ft.turn ? `대화 ${ft.turn}턴` : "대화 중"}</span>
+                <span className="trigger-text">{ft.trigger}</span>
+              </div>
+              {(ft.userQuote || ft.childReaction) && (
+                <div className="ft-quotes">
+                  {ft.userQuote && (
+                    <div className="ft-quote user">
+                      <span className="q-label">💬 선생님 발화:</span> "{ft.userQuote}"
+                    </div>
+                  )}
+                  {ft.childReaction && (
+                    <div className="ft-quote child">
+                      <span className="q-label">🥺 아이 반응:</span> "{ft.childReaction}"
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* 성향/시나리오 맞춤 루브릭 */}
+      {data.traitScores?.length > 0 && !isCheerful && !data.isEarlyTermination && (
+        <div className="review-section trait-rubric">
+          <h2>🎯 성향/시나리오 맞춤 대응 평가</h2>
+          <div className="trait-rubric-list">
+            {data.traitScores.map((item, i) => (
+              <div key={i} className="trait-rubric-card">
+                <div className="tr-header">
+                  <span className="tr-question">{item.question}</span>
+                  <span className="tr-score">
+                    {item.status === "no_opportunity" ? (
+                      <span className="no-opp-tag">➖ 기회 없음 (평가 제외)</span>
+                    ) : item.status === "missed" ? (
+                      <span className="missed-tag">⚠️ 기회 놓침 (0점)</span>
+                    ) : (
+                      <>
+                        <b>{item.score}</b> / {item.max || 3}점
+                      </>
+                    )}
+                  </span>
+                </div>
+                {item.evidence && (
+                  <div className="tr-evidence">💬 근거: "{item.evidence}"</div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* 기본 역량 평가 (활발한 아이 / 조기 종료 시 생략) */}
+      {!isCheerful && !data.isEarlyTermination && data.rubric?.length > 0 && (
         <div className="review-section">
-          <h2>역량 평가</h2>
+          <h2>기본 역량 평가</h2>
           <div className="rubric-grid">
             {data.rubric.map((r, i) => (
               <div key={i} className="rubric-row">
                 <span className="name">{r.name}</span>
-                <MoodGauge mood={r.score} />
-                <span className="score">{r.score}/5</span>
+                {r.status === "no_opportunity" || r.score === null ? (
+                  <span className="no-opp-tag">➖ 기회 없음</span>
+                ) : (
+                  <>
+                    <MoodGauge mood={r.score} />
+                    <span className="score">{r.score}/5</span>
+                  </>
+                )}
               </div>
             ))}
           </div>
@@ -505,7 +839,9 @@ export default function App() {
   const [currentPath, setCurrentPath] = useState(getNormalizedPath);
   const [screen, setScreen] = useState("home");
   const [scenario, setScenario] = useState(null);
+  const [sessionInfo, setSessionInfo] = useState(null);
   const [transcript, setTranscript] = useState("");
+  const [reviewExtraInfo, setReviewExtraInfo] = useState(null);
   const [chatKey, setChatKey] = useState(0);
 
   useEffect(() => {
@@ -532,8 +868,9 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
-  function selectScenario(s) {
+  function selectScenario(s, sInfo) {
     setScenario(s);
+    setSessionInfo(sInfo || null);
     setChatKey((k) => k + 1);
     setScreen("chat");
   }
@@ -541,12 +878,15 @@ export default function App() {
   function goHome() {
     setScreen("home");
     setScenario(null);
+    setSessionInfo(null);
     setTranscript("");
+    setReviewExtraInfo(null);
     handleNavigate("/");
   }
 
-  function finishChat(t) {
+  function finishChat(t, extra) {
     setTranscript(t);
+    setReviewExtraInfo(extra || null);
     setScreen("review");
   }
 
@@ -572,6 +912,7 @@ export default function App() {
             <Chat
               key={chatKey}
               scenario={scenario}
+              sessionInfo={sessionInfo}
               onDone={finishChat}
               onExit={goHome}
             />
@@ -580,6 +921,7 @@ export default function App() {
             <Review
               scenario={scenario}
               transcript={transcript}
+              extraInfo={reviewExtraInfo}
               onRetry={retry}
               onHome={goHome}
             />
@@ -595,3 +937,4 @@ export default function App() {
     </div>
   );
 }
+
