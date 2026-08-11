@@ -1,0 +1,134 @@
+﻿{
+    "child":  {
+                  "id":  "child-b",
+                  "name":  "김O준",
+                  "ageMonths":  35,
+                  "gender":  "남아",
+                  "teacherNote":  "토끼 선생님 담당",
+                  "noteCount":  5
+              },
+    "prep":  {
+                 "noteCount":  5,
+                 "level":  "standard",
+                 "materials":  {
+                                   "items":  [
+                                                 {
+                                                     "name":  "공",
+                                                     "score":  1
+                                                 },
+                                                 {
+                                                     "name":  "훌라후프",
+                                                     "score":  1
+                                                 },
+                                                 {
+                                                     "name":  "탬버린",
+                                                     "score":  1
+                                                 },
+                                                 {
+                                                     "name":  "크레파스",
+                                                     "score":  0.8
+                                                 },
+                                                 {
+                                                     "name":  "도화지",
+                                                     "score":  0.8
+                                                 },
+                                                 {
+                                                     "name":  "그림책",
+                                                     "score":  0.8
+                                                 },
+                                                 {
+                                                     "name":  "점토",
+                                                     "score":  0.6
+                                                 },
+                                                 {
+                                                     "name":  "쿠키틀",
+                                                     "score":  0.6
+                                                 },
+                                                 {
+                                                     "name":  "접시",
+                                                     "score":  0.6
+                                                 }
+                                             ],
+                                   "exhaustionWarnings":  [
+
+                                                          ]
+                               },
+                 "unfinished":  [
+
+                                ],
+                 "verified":  [
+                                  {
+                                      "tag":  "블록놀이",
+                                      "count":  2,
+                                      "positiveCount":  2
+                                  },
+                                  {
+                                      "tag":  "그림그리기",
+                                      "count":  2,
+                                      "positiveCount":  2
+                                  },
+                                  {
+                                      "tag":  "역할놀이",
+                                      "count":  2,
+                                      "positiveCount":  2
+                                  }
+                              ],
+                 "newToTry":  [
+
+                              ]
+             },
+    "recommendations":  [
+                            {
+                                "traitId":  "cling",
+                                "scenarioId":  "cling",
+                                "label":  "분리불안 시나리오",
+                                "desc":  "부모와 떨어지는 상황에서 불안한 모습이 관찰되었습니다.",
+                                "grade":  "strong",
+                                "quotes":  [
+                                               {
+                                                   "quote":  "엄마 오는 시간이에요? 라며 몇 번 확인했어요",
+                                                   "date":  "2026-08-21",
+                                                   "noteId":  "b-05"
+                                               },
+                                               {
+                                                   "quote":  "엄마 빨리 왔으면 좋겠다 하며 조용히 중얼거렸어요",
+                                                   "date":  "2026-08-07",
+                                                   "noteId":  "b-04"
+                                               },
+                                               {
+                                                   "quote":  "엄마한테 전화하고 싶어요 라며 간간이 요청",
+                                                   "date":  "2026-07-24",
+                                                   "noteId":  "b-03"
+                                               },
+                                               {
+                                                   "quote":  "놀이 중간중간 엄마 보고 싶어 라며 눈물을 보였어요",
+                                                   "date":  "2026-07-17",
+                                                   "noteId":  "b-02"
+                                               },
+                                               {
+                                                   "quote":  "엄마가 나가자 금방 울먹이며 엄마 언제 와 반복",
+                                                   "date":  "2026-07-10",
+                                                   "noteId":  "b-01"
+                                               }
+                                           ],
+                                "gradeLabel":  "자주 관찰됨",
+                                "message":  "부모와 떨어지는 상황에서 불안한 모습이 관찰되었습니다.\n분리불안 시나리오을 연습해두면 도움이 됩니다."
+                            },
+                            {
+                                "traitId":  "stubborn",
+                                "scenarioId":  "stubborn",
+                                "label":  "고집 시나리오",
+                                "desc":  "특정 방식을 고수하거나 거부하는 모습이 관찰되었습니다.",
+                                "grade":  "weak",
+                                "quotes":  [
+                                               {
+                                                   "quote":  "내 거야! 하며 점토를 독점하려 했어요",
+                                                   "date":  "2026-07-24",
+                                                   "noteId":  "b-03"
+                                               }
+                                           ],
+                                "gradeLabel":  "참고",
+                                "message":  "특정 방식을 고수하거나 거부하는 모습이 관찰되었습니다.\n고집 시나리오을 연습해두면 도움이 됩니다."
+                            }
+                        ]
+}

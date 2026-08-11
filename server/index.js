@@ -6,6 +6,7 @@ import express from "express";
 import { GoogleGenAI } from "@google/genai";
 import { PERSONAS, baseSystem, reviewSystem } from "./personas.js";
 import { composeSystemPrompt, composeReviewPrompt } from "./services/promptComposer.js";
+import { buildPrepDashboard } from "./services/prepEngine.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -102,6 +103,79 @@ app.get("/api/traits", (req, res) => {
     summary,
   }));
   res.json(list);
+});
+
+const CHILDREN_METADATA = [
+  { id: "child-a", childName: "구O윤", ageMonths: 27, gender: "여아", noteCount: 12, lastDate: "2026-10-01" },
+  { id: "child-b", childName: "김O준", ageMonths: 30, gender: "남아", noteCount: 5, lastDate: "2026-09-29" },
+  { id: "child-c", childName: "이O아", ageMonths: 24, gender: "여아", noteCount: 2, lastDate: "2026-10-08" },
+  { id: "child-d", childName: "박O진", ageMonths: 28, gender: "남아", noteCount: 0, lastDate: null },
+];
+
+function loadExtractedNotes(childId) {
+  const filePath = path.join(__dirname, `../fixtures/extracted/${childId}.json`);
+  if (fs.existsSync(filePath)) {
+    try {
+      return JSON.parse(fs.readFileSync(filePath, "utf-8"));
+    } catch {
+      return [];
+    }
+  }
+  return [];
+}
+
+app.get("/api/prep/children", (req, res) => {
+  res.json(CHILDREN_METADATA);
+});
+
+app.get("/api/prep/children/:childId", (req, res) => {
+  const { childId } = req.params;
+  const childInfo = CHILDREN_METADATA.find((c) => c.id === childId);
+  if (!childInfo) {
+    return res.status(404).json({ error: "child not found" });
+  }
+
+  const extractedNotes = loadExtractedNotes(childId);
+  const dashboard = buildPrepDashboard(childInfo, extractedNotes);
+  res.json(dashboard);
+});
+
+app.get("/api/prep/children/:childId/notes", (req, res) => {
+  const { childId } = req.params;
+  const childDir = path.join(__dirname, `../fixtures/notes/${childId}`);
+  if (!fs.existsSync(childDir)) {
+    return res.json([]);
+  }
+
+  try {
+    const files = fs.readdirSync(childDir).filter((f) => f.endsWith(".json"));
+    const notes = files.map((f) => {
+      return JSON.parse(fs.readFileSync(path.join(childDir, f), "utf-8"));
+    });
+    notes.sort((a, b) => new Date(b.date) - new Date(a.date)); // descending
+    res.json(notes);
+  } catch (err) {
+    res.status(500).json({ error: "failed to load notes" });
+  }
+});
+
+app.get("/api/prep/recommendations", (req, res) => {
+  const allRecs = [];
+  CHILDREN_METADATA.forEach((child) => {
+    const extractedNotes = loadExtractedNotes(child.id);
+    const dash = buildPrepDashboard(child, extractedNotes);
+    if (dash.recommendations && dash.recommendations.length > 0) {
+      dash.recommendations.forEach((rec) => {
+        allRecs.push({
+          ...rec,
+          childId: child.id,
+          childName: child.childName,
+          childAgeMonths: child.ageMonths,
+        });
+      });
+    }
+  });
+  res.json(allRecs);
 });
 
 app.post("/api/rehearsal/session", (req, res) => {

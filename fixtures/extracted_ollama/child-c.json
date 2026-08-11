@@ -1,0 +1,18 @@
+[
+  {
+    "positiveSignals": [
+      {
+        "content": "밝게 웃으며 첫 인사를 해주었어요 😊"
+      },
+      {
+        "traitId": "clinging",
+        "quote": "2세 여아 이O아의 촉감 놀이에 흥미가 있었어요."
+      }
+    ],
+    "negativeSignal": "none"
+  },
+  {
+    "traitId": "play",
+    "content": "촉감 놀이, 만들기"
+  }
+]

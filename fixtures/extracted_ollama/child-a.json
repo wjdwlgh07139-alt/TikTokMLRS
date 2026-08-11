@@ -1,0 +1,106 @@
+[
+  {
+    "positiveSignals": [
+      "놀이에 대한 흥미",
+      "새로운 장난감 탐색",
+      "의사표현 능력"
+    ],
+    "negativeSignals": []
+  },
+  {
+    "positiveSignals": [
+      {
+        "content": "탐색",
+        "traitId": "clinging"
+      }
+    ],
+    "negativeSignals": [],
+    "traitHints": [
+      {
+        "traitId": "why",
+        "strength": "weak"
+      }
+    ]
+  },
+  {
+    "positiveSignals": [
+      {
+        "content": "선을 긋는 걸 좋아했어요",
+        "traitId": "lines"
+      }
+    ],
+    "negativeSignals": [],
+    "traitHints": [
+      {
+        "traitId": "clinging",
+        "strength": "weak"
+      },
+      "shy"
+    ]
+  },
+  {
+    "positiveSignals": [
+      {
+        "content": "병원놀이를 즐겼습니다 🩺",
+        "traitId": "놀이"
+      },
+      {
+        "content": "만들기 활동을 했습니다 🎨",
+        "traitId": "만들기"
+      }
+    ],
+    "negativeSignals": [],
+    "traitHints": [
+      {
+        "strength": "strong",
+        "traitId": "attached"
+      }
+    ]
+  },
+  {
+    "positiveSignals": [
+      {
+        "content": "물감 놀이에 대한 흥미",
+        "traitId": "미술"
+      },
+      {
+        "content": "플레이콘 붙이기로 액자 꾸미기",
+        "traitId": "놀이"
+      }
+    ],
+    "traitHints": [
+      {
+        "traitId": "cling",
+        "strength": "weak"
+      }
+    ]
+  },
+  {
+    "traitId": "clay",
+    "content": "\"클레이 점토를 조물조물 반죽해서 빵 만들기 놀이를 했습니다. 🍞\""
+  },
+  {
+    "traitId": "clinging",
+    "content": "기차를 블록으로 만들어보았습니다 🚂"
+  },
+  {
+    "traitId": "clinging",
+    "content": "구O윤은 병원놀이 진찰실에서 주사를 놓아주고 스티커 칭찬 밴드를 착 붙여주는 다정한 시간을 즐겼습니다."
+  },
+  {
+    "traitId": "play",
+    "content": "구O윤은 만들기, 미술 놀이, 역할 놀이를 즐겼습니다."
+  },
+  {
+    "traitId": "clinging",
+    "content": "구O윤은 클레이 반죽으로 알록달록 애벌레를 만들어보았어요 🐛"
+  },
+  {
+    "traitId": "play",
+    "content": "구O윤은 병원놀이 세트와 블록으로 큰 종합병원을 지었어요 🏥"
+  },
+  {
+    "traitId": "attached",
+    "strength": "weak"
+  }
+]

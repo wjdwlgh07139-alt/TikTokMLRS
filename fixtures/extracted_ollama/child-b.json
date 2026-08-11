@@ -1,0 +1,44 @@
+[
+  {
+    "traitId": "clinging",
+    "content": "김O준 (30개월, 남아) · 놀이"
+  },
+  {
+    "positiveSignals": [
+      {
+        "content": "김O준 · 2세(30개월) 남아",
+        "quote": "\"엄마 보고 싶어요\"라며 훌쩍였어요 💧"
+      }
+    ],
+    "traitHints": [
+      {
+        "traitId": "why",
+        "strength": "weak"
+      },
+      {
+        "traitId": "clinging",
+        "strength": "moderate"
+      }
+    ]
+  },
+  {
+    "traitId": "play",
+    "content": "김O준 (30개월) · 남아 / 놀이"
+  },
+  {
+    "traitId": "why",
+    "content": "2세 남아 김O준 자동차 놀이와 미술 놀이를 즐겼습니다."
+  },
+  {
+    "positiveSignals": [
+      {
+        "content": "주차장을 멋지게 건설했어요!!",
+        "traitId": "attached"
+      },
+      {
+        "content": "2세 남아 김O준 / 블록 놀이, 자동차 놀이",
+        "traitId": "cling"
+      }
+    ]
+  }
+]

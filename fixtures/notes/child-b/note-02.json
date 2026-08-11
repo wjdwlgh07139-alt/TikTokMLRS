@@ -1,0 +1,41 @@
+{
+  "noteId": "b-02",
+  "date": "2026-09-08",
+  "ageMonths": 30,
+  "childName": "김O준",
+  "gender": "남아",
+  "rawNote": "2026년 9월 8일\n김O준 · 2세(30개월) · 남아 / 놀이\n태그: 자동차 놀이, 만들기\n\n[활동 내용]\n두 번째 방문에서도 초반에 현관문을 보며 \"엄마 보고 싶어요\" 라며 훌쩍였어요 💧\n시계를 함께 가리키며 \"긴 바늘이 6에 가면 엄마 오실 거야\" 안심시켜 주고 자동차 도로 테이프를 붙여 놀이했습니다!!",
+  "extracted": {
+    "noteId": "b-02",
+    "date": "2026-09-08",
+    "ageMonths": 30,
+    "activityTags": [
+      "자동차 놀이",
+      "만들기"
+    ],
+    "materials": [
+      "미니카",
+      "도로 테이프"
+    ],
+    "positiveSignals": [
+      {
+        "content": "도로 테이프 놀이에 호기심 표현",
+        "quote": "자동차 도로 테이프를 붙여 놀이했습니다!!"
+      }
+    ],
+    "negativeSignals": [
+      {
+        "content": "분리 불안 지속",
+        "quote": "현관문을 보며 \"엄마 보고 싶어요\" 라며 훌쩍였어요"
+      }
+    ],
+    "unfinished": null,
+    "traitHints": [
+      {
+        "traitId": "cling",
+        "strength": "strong",
+        "quote": "현관문을 보며 \"엄마 보고 싶어요\" 라며 훌쩍였어요"
+      }
+    ]
+  }
+}

@@ -1,0 +1,209 @@
+﻿{
+    "child":  {
+                  "id":  "child-a",
+                  "name":  "구O윤",
+                  "ageMonths":  27,
+                  "gender":  "여아",
+                  "teacherNote":  "악어 선생님 담당",
+                  "noteCount":  12
+              },
+    "prep":  {
+                 "noteCount":  12,
+                 "level":  "full",
+                 "materials":  {
+                                   "items":  [
+                                                 {
+                                                     "name":  "도화지",
+                                                     "score":  1
+                                                 },
+                                                 {
+                                                     "name":  "색연필",
+                                                     "score":  1
+                                                 },
+                                                 {
+                                                     "name":  "스티커",
+                                                     "score":  1
+                                                 },
+                                                 {
+                                                     "name":  "블록",
+                                                     "score":  1
+                                                 },
+                                                 {
+                                                     "name":  "물감",
+                                                     "score":  0.8
+                                                 },
+                                                 {
+                                                     "name":  "수건",
+                                                     "score":  0.8
+                                                 },
+                                                 {
+                                                     "name":  "물놀이세트",
+                                                     "score":  0.8
+                                                 },
+                                                 {
+                                                     "name":  "컵",
+                                                     "score":  0.8
+                                                 },
+                                                 {
+                                                     "name":  "점토",
+                                                     "score":  0.6
+                                                 },
+                                                 {
+                                                     "name":  "동물피규어",
+                                                     "score":  0.6
+                                                 },
+                                                 {
+                                                     "name":  "나뭇잎",
+                                                     "score":  0.6
+                                                 }
+                                             ],
+                                   "exhaustionWarnings":  [
+
+                                                          ]
+                               },
+                 "unfinished":  [
+
+                                ],
+                 "verified":  [
+                                  {
+                                      "tag":  "만들기",
+                                      "count":  7,
+                                      "positiveCount":  7
+                                  },
+                                  {
+                                      "tag":  "역할놀이",
+                                      "count":  5,
+                                      "positiveCount":  5
+                                  },
+                                  {
+                                      "tag":  "촉감놀이",
+                                      "count":  3,
+                                      "positiveCount":  3
+                                  },
+                                  {
+                                      "tag":  "미술놀이",
+                                      "count":  2,
+                                      "positiveCount":  2
+                                  }
+                              ],
+                 "newToTry":  [
+                                  "책읽기",
+                                  "요리놀이",
+                                  "바깥놀이",
+                                  "신체놀이",
+                                  "음악놀이",
+                                  "율동",
+                                  "블록놀이"
+                              ],
+                 "trend":  {
+                               "firstHalf":  {
+                                                 "noteCount":  6,
+                                                 "period":  "2026-05-10 ~ 2026-07-05"
+                                             },
+                               "secondHalf":  {
+                                                  "noteCount":  6,
+                                                  "period":  "2026-07-19 ~ 2026-09-27"
+                                              },
+                               "changes":  [
+                                               {
+                                                   "tag":  "역할놀이",
+                                                   "before":  4,
+                                                   "after":  1,
+                                                   "direction":  "감소"
+                                               },
+                                               {
+                                                   "tag":  "만들기",
+                                                   "before":  4,
+                                                   "after":  3,
+                                                   "direction":  "감소"
+                                               },
+                                               {
+                                                   "tag":  "촉감놀이",
+                                                   "before":  2,
+                                                   "after":  1,
+                                                   "direction":  "감소"
+                                               },
+                                               {
+                                                   "tag":  "책읽기",
+                                                   "before":  1,
+                                                   "after":  0,
+                                                   "direction":  "감소"
+                                               },
+                                               {
+                                                   "tag":  "요리놀이",
+                                                   "before":  1,
+                                                   "after":  0,
+                                                   "direction":  "감소"
+                                               },
+                                               {
+                                                   "tag":  "바깥놀이",
+                                                   "before":  1,
+                                                   "after":  0,
+                                                   "direction":  "감소"
+                                               },
+                                               {
+                                                   "tag":  "신체놀이",
+                                                   "before":  1,
+                                                   "after":  0,
+                                                   "direction":  "감소"
+                                               },
+                                               {
+                                                   "tag":  "음악놀이",
+                                                   "before":  0,
+                                                   "after":  1,
+                                                   "direction":  "증가"
+                                               },
+                                               {
+                                                   "tag":  "율동",
+                                                   "before":  0,
+                                                   "after":  1,
+                                                   "direction":  "증가"
+                                               },
+                                               {
+                                                   "tag":  "블록놀이",
+                                                   "before":  0,
+                                                   "after":  1,
+                                                   "direction":  "증가"
+                                               },
+                                               {
+                                                   "tag":  "퍼즐",
+                                                   "before":  0,
+                                                   "after":  1,
+                                                   "direction":  "증가"
+                                               },
+                                               {
+                                                   "tag":  "보드게임",
+                                                   "before":  0,
+                                                   "after":  1,
+                                                   "direction":  "증가"
+                                               },
+                                               {
+                                                   "tag":  "물놀이",
+                                                   "before":  0,
+                                                   "after":  1,
+                                                   "direction":  "증가"
+                                               },
+                                               {
+                                                   "tag":  "감각놀이",
+                                                   "before":  0,
+                                                   "after":  1,
+                                                   "direction":  "증가"
+                                               }
+                                           ]
+                           }
+             },
+    "recommendations":  [
+                            {
+                                "traitId":  "cheerful",
+                                "scenarioId":  "cheerful",
+                                "label":  "활발한 아이 시나리오",
+                                "desc":  "현재까지 특별한 어려움 신호가 관찰되지 않았습니다. 잘 풀릴 때도 기본기를 빠뜨리지 않도록 연습해 보세요.",
+                                "grade":  "default",
+                                "quotes":  [
+
+                                           ],
+                                "gradeLabel":  "",
+                                "message":  "현재까지 특별한 어려움 신호가 관찰되지 않았습니다. 잘 풀릴 때도 기본기를 빠뜨리지 않도록 연습해 보세요."
+                            }
+                        ]
+}

@@ -1,0 +1,30 @@
+{
+  "noteId": "c-01",
+  "date": "2026-10-05",
+  "ageMonths": 24,
+  "childName": "이O아",
+  "gender": "여아",
+  "rawNote": "2026년 10월 5일\n이O아 · 2세(24개월) · 여아 / 놀이\n태그: 촉감 놀이, 그림책\n\n[활동 내용]\n밝게 웃으며 첫 인사를 해주었어요 😊 보들보들 헝겊책을 넘겨보고 소리 나는 딸랑이 공을 굴리며 하하 호호 즐거운 시간을 보냈답니다!!",
+  "extracted": {
+    "noteId": "c-01",
+    "date": "2026-10-05",
+    "ageMonths": 24,
+    "activityTags": [
+      "촉감 놀이",
+      "그림책"
+    ],
+    "materials": [
+      "헝겊책",
+      "딸랑이 공"
+    ],
+    "positiveSignals": [
+      {
+        "content": "첫 인사 맑은 표정과 딸랑이 공 반응 우수",
+        "quote": "밝게 웃으며 첫 인사를 해주었어요"
+      }
+    ],
+    "negativeSignals": [],
+    "unfinished": null,
+    "traitHints": []
+  }
+}

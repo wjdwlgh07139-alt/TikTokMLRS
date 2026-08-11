@@ -1,0 +1,30 @@
+{
+  "noteId": "c-02",
+  "date": "2026-10-08",
+  "ageMonths": 24,
+  "childName": "이O아",
+  "gender": "여아",
+  "rawNote": "2026년 10월 8일\n이O아 · 2세(24개월) · 여아 / 놀이\n태그: 촉감 놀이, 만들기\n\n[활동 내용]\n오늘도 선생님 반갑게 맞아주고 플레이콘으로 동물 모양에 꼭꼭 찍어붙이기 놀이를 진행했습니다 🐰\n노래에 맞춰 짝짝꿍 손뼉을 치며 신나게 놀이하고 마쳤어요!",
+  "extracted": {
+    "noteId": "c-02",
+    "date": "2026-10-08",
+    "ageMonths": 24,
+    "activityTags": [
+      "촉감 놀이",
+      "만들기"
+    ],
+    "materials": [
+      "플레이콘",
+      "그림 도안"
+    ],
+    "positiveSignals": [
+      {
+        "content": "리듬에 맞춰 짝짝꿍 상호작용 만점",
+        "quote": "노래에 맞춰 짝짝꿍 손뼉을 치며 신나게 놀이"
+      }
+    ],
+    "negativeSignals": [],
+    "unfinished": null,
+    "traitHints": []
+  }
+}

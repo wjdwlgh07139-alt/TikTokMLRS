@@ -5,6 +5,8 @@ import ClosingContact from "./components/ClosingContact.jsx";
 import TraitSelectorModal from "./components/TraitSelectorModal.jsx";
 import TraitTipCard from "./components/TraitTipCard.jsx";
 import BlindGuessModal from "./components/BlindGuessModal.jsx";
+import PrepDashboard from "./components/PrepDashboard.jsx";
+import RehearsalRecommendBanner from "./components/RehearsalRecommendBanner.jsx";
 import { MAX_USER_INPUT_CHARS, WARN_USER_INPUT_CHARS, WARN_INPUT_MESSAGE } from "./constants.js";
 
 const MOOD_LABEL = {
@@ -49,10 +51,11 @@ function MoodGauge({ mood }) {
 }
 
 function BottomTabBar({ currentPath, onNavigate }) {
-  const norm = currentPath === "" ? "/" : currentPath;
+  const norm = currentPath.startsWith("/prep") ? "/prep" : currentPath === "" ? "/" : currentPath;
 
   const tabs = [
     { id: "/", label: "리허설", icon: "🎭" },
+    { id: "/prep", label: "수업 준비", icon: "📋" },
     { id: "/contact/matching", label: "첫 연락", icon: "🤝" },
   ];
 
@@ -98,7 +101,7 @@ function LevelDots({ level }) {
   );
 }
 
-function Home({ onSelect }) {
+function Home({ onSelect, onStartRehearsalFromRec }) {
   const [activeCat, setActiveCat] = useState("child");
   const [sheetScenario, setSheetScenario] = useState(null);
   const [traitSelectingScenario, setTraitSelectingScenario] = useState(null);
@@ -182,7 +185,10 @@ function Home({ onSelect }) {
 
   return (
     <>
+      <RehearsalRecommendBanner onSelectRecommendation={onStartRehearsalFromRec} />
+
       <div className="hero">
+
         <h1>🐣 째깍 리허설</h1>
         <p className="sub">
           진짜 만남 전에, 상황 하나를 골라 3~4번만 짧게 미리 연습해봐요.
@@ -895,6 +901,34 @@ export default function App() {
     setScreen("chat");
   }
 
+  const handleStartRehearsalFromRec = async (scenarioId, traitId) => {
+    const targetScenario = SCENARIOS.find((s) => s.id === scenarioId) || SCENARIOS[0];
+    try {
+      const res = await fetch("/api/rehearsal/session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          scenarioId: targetScenario.id,
+          traitId: traitId || null,
+          blindMode: false,
+        }),
+      });
+      const data = await res.json();
+      selectScenario(targetScenario, {
+        sessionId: data.sessionId,
+        trait: data.trait || null,
+        blindMode: false,
+        traitId,
+        openingLine: data.openingLine || data.trait?.openingLine,
+        initialLevel: data.initialLevel ?? data.trait?.initialLevel,
+      });
+      handleNavigate("/");
+    } catch {
+      selectScenario(targetScenario, { sessionId: null, trait: null, blindMode: false, traitId });
+      handleNavigate("/");
+    }
+  };
+
   return (
     <div className="app">
       {currentPath === "/contact/matching" && <MatchingContact />}
@@ -903,10 +937,22 @@ export default function App() {
         currentPath === "/careendtemplate" ||
         currentPath === "/contact/closing") && <ClosingContact />}
 
+      {currentPath.startsWith("/prep") && (
+        <PrepDashboard
+          childIdParam={currentPath.replace(/^\/prep\/?/, "") || null}
+          onNavigate={handleNavigate}
+          onStartRehearsal={handleStartRehearsalFromRec}
+        />
+      )}
+
       {currentPath === "/" && (
         <>
           {(screen === "home" || !scenario) && (
-            <Home onSelect={selectScenario} onNavigate={handleNavigate} />
+            <Home
+              onSelect={selectScenario}
+              onNavigate={handleNavigate}
+              onStartRehearsalFromRec={handleStartRehearsalFromRec}
+            />
           )}
           {screen === "chat" && scenario && (
             <Chat
@@ -937,4 +983,5 @@ export default function App() {
     </div>
   );
 }
+
 
