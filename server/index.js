@@ -1,13 +1,27 @@
 import "dotenv/config";
+import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import express from "express";
 import { GoogleGenAI } from "@google/genai";
 import { PERSONAS, baseSystem, reviewSystem } from "./personas.js";
+import { composeSystemPrompt, composeReviewPrompt } from "./services/promptComposer.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const distPath = path.join(__dirname, "../client/dist");
+
+const traitsData = JSON.parse(
+  fs.readFileSync(path.join(__dirname, "./data/traits.json"), "utf-8")
+);
+
+// 세션 저장소 (In-memory)
+const SESSIONS = new Map();
+
+function getRandomTraitId() {
+  const ids = traitsData.map((t) => t.id);
+  return ids[Math.floor(Math.random() * ids.length)];
+}
 
 // Gemini 모델 문자열은 언제든 바뀔 수 있으므로 상수만 바꾸면 되게 분리해둠.
 // 최신 목록: https://ai.google.dev/gemini-api/docs/models
@@ -62,20 +76,89 @@ function toGeminiContents(messages) {
   }));
 }
 
+app.get("/api/traits", (req, res) => {
+  const list = traitsData.map(({ id, label, summary }) => ({
+    id,
+    label,
+    summary,
+  }));
+  res.json(list);
+});
+
+app.post("/api/rehearsal/session", (req, res) => {
+  const { scenarioId, traitId: rawTraitId, blindMode = false } = req.body || {};
+  let traitId = rawTraitId;
+
+  if (traitId === "random") {
+    traitId = getRandomTraitId();
+  }
+
+  const trait = traitsData.find((t) => t.id === traitId) || null;
+  const sessionId = "sess_" + Date.now() + "_" + Math.random().toString(36).slice(2, 7);
+
+  const sessionObj = {
+    sessionId,
+    scenarioId,
+    traitId: trait ? trait.id : null,
+    blindMode: Boolean(blindMode),
+    createdAt: Date.now(),
+  };
+
+  SESSIONS.set(sessionId, sessionObj);
+
+  const responseData = {
+    sessionId,
+  };
+
+  if (trait && !blindMode) {
+    responseData.trait = {
+      id: trait.id,
+      label: trait.label,
+      tips: trait.tips,
+      exampleLines: trait.exampleLines,
+    };
+  }
+
+  res.json(responseData);
+});
+
 app.post("/api/roleplay", async (req, res) => {
   try {
-    const { scenarioId, messages } = req.body || {};
+    const { scenarioId: reqScenarioId, sessionId, traitId: reqTraitId, messages } = req.body || {};
+
+    let scenarioId = reqScenarioId;
+    let traitId = reqTraitId;
+    let blindMode = false;
+
+    if (sessionId && SESSIONS.has(sessionId)) {
+      const sess = SESSIONS.get(sessionId);
+      scenarioId = scenarioId || sess.scenarioId;
+      traitId = traitId || sess.traitId;
+      blindMode = sess.blindMode;
+    }
+
+    if (traitId === "random") {
+      traitId = getRandomTraitId();
+    }
+
     const persona = PERSONAS.find((p) => p.id === scenarioId);
     if (!persona) {
       return res.status(400).json({ error: "invalid scenarioId" });
     }
+
+    const trait = traitsData.find((t) => t.id === traitId) || null;
 
     const convo = Array.isArray(messages) ? messages : [];
     const userTurns = convo.filter((m) => m.role === "user").length;
     const maxTurns = persona.turns || MAX_TURNS;
     const isFinal = userTurns >= maxTurns;
 
-    let system = baseSystem(persona.persona);
+    let system = composeSystemPrompt({
+      scenarioPersona: persona.persona,
+      trait,
+      blindMode,
+    });
+
     if (isFinal) {
       system +=
         "\n\n[중요] 이번이 마지막 응답입니다. 자연스럽게 마무리하고 done=true로 하세요.";
@@ -120,12 +203,20 @@ app.post("/api/roleplay", async (req, res) => {
 
 app.post("/api/review", async (req, res) => {
   try {
-    const { title, transcript } = req.body || {};
+    const { title, transcript, sessionId, traitId: reqTraitId } = req.body || {};
     if (!title || !transcript) {
       return res.status(400).json({ error: "title and transcript are required" });
     }
 
-    const system = reviewSystem(title, transcript);
+    let traitId = reqTraitId;
+    if (sessionId && SESSIONS.has(sessionId)) {
+      const sess = SESSIONS.get(sessionId);
+      traitId = traitId || sess.traitId;
+    }
+
+    const trait = traitsData.find((t) => t.id === traitId) || null;
+    const system = composeReviewPrompt({ title, transcript, trait });
+
     const response = await ai.models.generateContent({
       model: MODEL_REVIEW,
       contents: [
@@ -135,7 +226,6 @@ app.post("/api/review", async (req, res) => {
         systemInstruction: system,
         maxOutputTokens: 4096,
         responseMimeType: "application/json",
-        // 평가는 대사 생성보다 깊게 생각해야 하므로 thinkingLevel을 높게 잡는다.
         thinkingConfig: { thinkingLevel: "high" },
       },
     });
@@ -147,6 +237,17 @@ app.post("/api/review", async (req, res) => {
     } catch (err) {
       console.error("[review parse error]", err, text);
       return res.status(500).json({ error: "review parsing failed" });
+    }
+
+    if (trait) {
+      result.actualTrait = {
+        id: trait.id,
+        label: trait.label,
+        summary: trait.summary,
+        behaviorSignals: trait.behaviorSignals,
+        tips: trait.tips,
+        exampleLines: trait.exampleLines,
+      };
     }
 
     res.json(result);

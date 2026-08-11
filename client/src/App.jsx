@@ -2,6 +2,9 @@ import { useEffect, useRef, useState } from "react";
 import { SCENARIOS } from "./scenarios.js";
 import MatchingContact from "./components/MatchingContact.jsx";
 import ClosingContact from "./components/ClosingContact.jsx";
+import TraitSelectorModal from "./components/TraitSelectorModal.jsx";
+import TraitTipCard from "./components/TraitTipCard.jsx";
+import BlindGuessModal from "./components/BlindGuessModal.jsx";
 
 const MOOD_LABEL = {
   1: "😟 많이 불안해요",
@@ -17,8 +20,20 @@ function speakerLabel(scenario, role) {
 }
 
 function buildTranscript(scenario, log) {
+  let userTurnCount = 0;
   return log
-    .map((m) => `${speakerLabel(scenario, m.role)}: ${m.content}`)
+    .map((m) => {
+      if (m.role === "user") {
+        userTurnCount++;
+        return `[${userTurnCount}턴] 선생님: ${m.content}`;
+      } else {
+        if (userTurnCount === 0) {
+          return `[오프닝] 아이: ${m.content}`;
+        } else {
+          return `[${userTurnCount}턴 아이 반응] 아이: ${m.content}`;
+        }
+      }
+    })
     .join("\n");
 }
 
@@ -60,7 +75,6 @@ function BottomTabBar({ currentPath, onNavigate }) {
   );
 }
 
-
 const LEVEL_LABEL = { easy: "쉬움", mid: "보통", hard: "도전" };
 
 const EXPLAIN = {
@@ -86,19 +100,62 @@ function LevelDots({ level }) {
 function Home({ onSelect }) {
   const [activeCat, setActiveCat] = useState("child");
   const [sheetScenario, setSheetScenario] = useState(null);
+  const [traitSelectingScenario, setTraitSelectingScenario] = useState(null);
 
   const childCount = SCENARIOS.filter((s) => s.group === "child").length;
   const parentCount = SCENARIOS.filter((s) => s.group === "parent").length;
-
   const currentScenarios = SCENARIOS.filter((s) => s.group === activeCat);
 
   useEffect(() => {
     function handleKeyDown(e) {
-      if (e.key === "Escape") setSheetScenario(null);
+      if (e.key === "Escape") {
+        setSheetScenario(null);
+        setTraitSelectingScenario(null);
+      }
     }
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
+
+  const handleStartScenario = (targetScenario) => {
+    setSheetScenario(null);
+    if (targetScenario.group === "child") {
+      setTraitSelectingScenario(targetScenario);
+    } else {
+      onSelect(targetScenario, { sessionId: null, trait: null, blindMode: false });
+    }
+  };
+
+  const handleTraitConfirm = async ({ traitId, blindMode }) => {
+    const targetScenario = traitSelectingScenario;
+    setTraitSelectingScenario(null);
+
+    try {
+      const res = await fetch("/api/rehearsal/session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          scenarioId: targetScenario.id,
+          traitId,
+          blindMode,
+        }),
+      });
+      const data = await res.json();
+      onSelect(targetScenario, {
+        sessionId: data.sessionId,
+        trait: data.trait || null,
+        blindMode,
+        traitId,
+      });
+    } catch {
+      onSelect(targetScenario, {
+        sessionId: null,
+        trait: null,
+        blindMode,
+        traitId,
+      });
+    }
+  };
 
   return (
     <>
@@ -225,13 +282,9 @@ function Home({ onSelect }) {
             </div>
             <button
               className="start-btn"
-              onClick={() => {
-                const targetScenario = sheetScenario;
-                setSheetScenario(null);
-                onSelect(targetScenario);
-              }}
+              onClick={() => handleStartScenario(sheetScenario)}
             >
-              연습 시작
+              성향 선택 / 연습 시작 →
             </button>
             <button
               className="close-btn"
@@ -242,12 +295,20 @@ function Home({ onSelect }) {
           </div>
         )}
       </div>
+
+      {/* Trait Selector Modal */}
+      {traitSelectingScenario && (
+        <TraitSelectorModal
+          scenario={traitSelectingScenario}
+          onConfirm={handleTraitConfirm}
+          onClose={() => setTraitSelectingScenario(null)}
+        />
+      )}
     </>
   );
 }
 
-
-function Chat({ scenario, onDone, onExit }) {
+function Chat({ scenario, sessionInfo, onDone, onExit }) {
   const [log, setLog] = useState([
     { role: "assistant", content: scenario.opening },
   ]);
@@ -257,7 +318,12 @@ function Chat({ scenario, onDone, onExit }) {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showGuessModal, setShowGuessModal] = useState(false);
+  const [fetchedActualTrait, setFetchedActualTrait] = useState(null);
+
   const logEndRef = useRef(null);
+
+  const { sessionId, trait, blindMode, traitId } = sessionInfo || {};
 
   useEffect(() => {
     logEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
@@ -282,7 +348,12 @@ function Chat({ scenario, onDone, onExit }) {
       const res = await fetch("/api/roleplay", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ scenarioId: scenario.id, messages: apiMessages }),
+        body: JSON.stringify({
+          scenarioId: scenario.id,
+          sessionId,
+          traitId,
+          messages: apiMessages,
+        }),
       });
 
       if (!res.ok) throw new Error("server error");
@@ -306,6 +377,45 @@ function Chat({ scenario, onDone, onExit }) {
     }
   }
 
+  const handleFinishClick = async () => {
+    const transcriptText = buildTranscript(scenario, log);
+    if (blindMode) {
+      // 블라인드 모드인 경우 정답 성향을 받아와 Guess Modal 오픈
+      try {
+        const res = await fetch("/api/review", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            title: scenario.title,
+            transcript: transcriptText,
+            sessionId,
+            traitId,
+          }),
+        });
+        if (res.ok) {
+          const json = await res.json();
+          setFetchedActualTrait(json.actualTrait || null);
+        }
+      } catch {
+        // fallback
+      }
+      setShowGuessModal(true);
+    } else {
+      onDone(transcriptText, { sessionId, traitId, trait });
+    }
+  };
+
+  const handleGuessComplete = (guessResult) => {
+    setShowGuessModal(false);
+    const transcriptText = buildTranscript(scenario, log);
+    onDone(transcriptText, {
+      sessionId,
+      traitId,
+      trait: fetchedActualTrait,
+      guessResult,
+    });
+  };
+
   return (
     <div className="chat-container">
       <div className="chat-header">
@@ -318,6 +428,8 @@ function Chat({ scenario, onDone, onExit }) {
         </div>
         <MoodGauge mood={mood} />
       </div>
+
+      {!blindMode && trait && <TraitTipCard trait={trait} />}
 
       <div className="scenario-banner">
         <p className="mood-text">{MOOD_LABEL[mood] || ""}</p>
@@ -344,11 +456,8 @@ function Chat({ scenario, onDone, onExit }) {
 
       <div className="chat-input-area">
         {done ? (
-          <button
-            className="primary-btn full"
-            onClick={() => onDone(buildTranscript(scenario, log))}
-          >
-            대화 종료 · 피드백 보기 ➔
+          <button className="primary-btn full" onClick={handleFinishClick}>
+            {blindMode ? "대화 종료 · 성향 추측하기 🎲" : "대화 종료 · 피드백 보기 ➔"}
           </button>
         ) : (
           <>
@@ -373,14 +482,24 @@ function Chat({ scenario, onDone, onExit }) {
           </>
         )}
       </div>
+
+      {showGuessModal && (
+        <BlindGuessModal
+          actualTrait={fetchedActualTrait}
+          log={log}
+          onComplete={handleGuessComplete}
+        />
+      )}
     </div>
   );
 }
 
-function Review({ scenario, transcript, onRetry, onHome }) {
+function Review({ scenario, transcript, extraInfo, onRetry, onHome }) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  const { sessionId, traitId, guessResult } = extraInfo || {};
 
   useEffect(() => {
     let unmounted = false;
@@ -389,7 +508,12 @@ function Review({ scenario, transcript, onRetry, onHome }) {
         const res = await fetch("/api/review", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ title: scenario.title, transcript }),
+          body: JSON.stringify({
+            title: scenario.title,
+            transcript,
+            sessionId,
+            traitId,
+          }),
         });
         if (!res.ok) throw new Error("review failed");
         const json = await res.json();
@@ -404,7 +528,7 @@ function Review({ scenario, transcript, onRetry, onHome }) {
     return () => {
       unmounted = true;
     };
-  }, [scenario, transcript]);
+  }, [scenario, transcript, sessionId, traitId]);
 
   if (loading) {
     return (
@@ -426,14 +550,27 @@ function Review({ scenario, transcript, onRetry, onHome }) {
     );
   }
 
+  const actualTrait = data?.actualTrait;
+
   return (
     <>
       <div className="review-header">
         <h1>리허설 리포트</h1>
         <p className="scenario-sub">
           {scenario.emoji} {scenario.title}
+          {actualTrait && <span className="trait-badge"> · {actualTrait.label}</span>}
         </p>
       </div>
+
+      {guessResult && (
+        <div className={`guess-summary-card ${guessResult.isCorrect ? "success" : "miss"}`}>
+          <span className="icon">{guessResult.isCorrect ? "🎯" : "💡"}</span>
+          <div>
+            <b>블라인드 모드 추측 결과: {guessResult.isCorrect ? "정답!" : "오답"}</b>
+            <p>실제 아이 성향: {actualTrait?.label || "비밀"}</p>
+          </div>
+        </div>
+      )}
 
       {data.overall && (
         <div className="review-section overall">
@@ -442,9 +579,63 @@ function Review({ scenario, transcript, onRetry, onHome }) {
         </div>
       )}
 
+      {/* 성향 실패 트리거 감지 결과 */}
+      {data.triggeredFails?.length > 0 && (
+        <div className="review-section fail-triggers">
+          <h2>⚠️ 실패 트리거 감지</h2>
+          <p className="section-desc">대화 중 아이가 위축되거나 반응이 돌아선 순간입니다:</p>
+          {data.triggeredFails.map((ft, i) => (
+            <div key={i} className="fail-trigger-card">
+              <div className="ft-header">
+                <span className="turn-tag">{ft.turn ? `대화 ${ft.turn}턴` : "대화 중"}</span>
+                <span className="trigger-text">{ft.trigger}</span>
+              </div>
+              {(ft.userQuote || ft.childReaction) && (
+                <div className="ft-quotes">
+                  {ft.userQuote && (
+                    <div className="ft-quote user">
+                      <span className="q-label">💬 선생님 발화:</span> "{ft.userQuote}"
+                    </div>
+                  )}
+                  {ft.childReaction && (
+                    <div className="ft-quote child">
+                      <span className="q-label">🥺 아이 반응:</span> "{ft.childReaction}"
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* 성향별 루브릭 항목 */}
+      {data.traitScores?.length > 0 && (
+        <div className="review-section trait-rubric">
+          <h2>🎯 성향 맞춤 대응 평가</h2>
+          <div className="trait-rubric-list">
+            {data.traitScores.map((item, i) => (
+              <div key={i} className="trait-rubric-card">
+                <div className="tr-header">
+                  <span className="tr-question">{item.question}</span>
+                  <span className="tr-score">
+                    <b>{item.score}</b> / {item.max || 3}점
+                  </span>
+                </div>
+                {item.evidence && (
+                  <div className="tr-evidence">
+                    💬 근거: "{item.evidence}"
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {data.rubric?.length > 0 && (
         <div className="review-section">
-          <h2>역량 평가</h2>
+          <h2>기본 역량 평가</h2>
           <div className="rubric-grid">
             {data.rubric.map((r, i) => (
               <div key={i} className="rubric-row">
@@ -505,7 +696,9 @@ export default function App() {
   const [currentPath, setCurrentPath] = useState(getNormalizedPath);
   const [screen, setScreen] = useState("home");
   const [scenario, setScenario] = useState(null);
+  const [sessionInfo, setSessionInfo] = useState(null);
   const [transcript, setTranscript] = useState("");
+  const [reviewExtraInfo, setReviewExtraInfo] = useState(null);
   const [chatKey, setChatKey] = useState(0);
 
   useEffect(() => {
@@ -532,8 +725,9 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
-  function selectScenario(s) {
+  function selectScenario(s, sInfo) {
     setScenario(s);
+    setSessionInfo(sInfo || null);
     setChatKey((k) => k + 1);
     setScreen("chat");
   }
@@ -541,12 +735,15 @@ export default function App() {
   function goHome() {
     setScreen("home");
     setScenario(null);
+    setSessionInfo(null);
     setTranscript("");
+    setReviewExtraInfo(null);
     handleNavigate("/");
   }
 
-  function finishChat(t) {
+  function finishChat(t, extra) {
     setTranscript(t);
+    setReviewExtraInfo(extra || null);
     setScreen("review");
   }
 
@@ -572,6 +769,7 @@ export default function App() {
             <Chat
               key={chatKey}
               scenario={scenario}
+              sessionInfo={sessionInfo}
               onDone={finishChat}
               onExit={goHome}
             />
@@ -580,6 +778,7 @@ export default function App() {
             <Review
               scenario={scenario}
               transcript={transcript}
+              extraInfo={reviewExtraInfo}
               onRetry={retry}
               onHome={goHome}
             />
@@ -595,3 +794,4 @@ export default function App() {
     </div>
   );
 }
+
