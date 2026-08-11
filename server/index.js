@@ -7,6 +7,7 @@ import { GoogleGenAI } from "@google/genai";
 import { PERSONAS, baseSystem, reviewSystem } from "./personas.js";
 import { composeSystemPrompt, composeReviewPrompt } from "./services/promptComposer.js";
 import { buildPrepDashboard } from "./services/prepEngine.js";
+import { checkKananaStatus, extractNoteWithKanana } from "./services/kananaService.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -106,17 +107,19 @@ app.get("/api/traits", (req, res) => {
 });
 
 const CHILDREN_METADATA = [
-  { id: "child-a", childName: "구O윤", ageMonths: 27, gender: "여아", noteCount: 12, lastDate: "2026-10-01" },
-  { id: "child-b", childName: "김O준", ageMonths: 30, gender: "남아", noteCount: 5, lastDate: "2026-09-29" },
-  { id: "child-c", childName: "이O아", ageMonths: 24, gender: "여아", noteCount: 2, lastDate: "2026-10-08" },
-  { id: "child-d", childName: "박O진", ageMonths: 28, gender: "남아", noteCount: 0, lastDate: null },
+  { id: "child-a", childName: "구O윤", name: "구O윤", ageMonths: 27, gender: "여아", noteCount: 12, totalNotesCount: 12, lastDate: "2026-10-01", teacherNote: "악어 선생님 담당" },
+  { id: "child-b", childName: "김O준", name: "김O준", ageMonths: 35, gender: "남아", noteCount: 5, totalNotesCount: 5, lastDate: "2026-09-29", teacherNote: "토끼 선생님 담당" },
+  { id: "child-c", childName: "이O서", name: "이O서", ageMonths: 30, gender: "여아", noteCount: 2, totalNotesCount: 2, lastDate: "2026-10-08", teacherNote: "곰돌이 선생님 담당" },
+  { id: "child-d", childName: "박O진", name: "박O진", ageMonths: 28, gender: "남아", noteCount: 0, totalNotesCount: 0, lastDate: null, teacherNote: "사자 선생님 담당" },
 ];
 
 function loadExtractedNotes(childId) {
-  const filePath = path.join(__dirname, `../fixtures/extracted/${childId}.json`);
-  if (fs.existsSync(filePath)) {
+  const ollamaPath = path.join(__dirname, `../fixtures/extracted_ollama/${childId}.json`);
+  const defaultPath = path.join(__dirname, `../fixtures/extracted/${childId}.json`);
+  const targetPath = fs.existsSync(ollamaPath) ? ollamaPath : defaultPath;
+  if (fs.existsSync(targetPath)) {
     try {
-      return JSON.parse(fs.readFileSync(filePath, "utf-8"));
+      return JSON.parse(fs.readFileSync(targetPath, "utf-8"));
     } catch {
       return [];
     }
@@ -126,6 +129,24 @@ function loadExtractedNotes(childId) {
 
 app.get("/api/prep/children", (req, res) => {
   res.json(CHILDREN_METADATA);
+});
+
+app.get("/api/prep/kanana/status", async (req, res) => {
+  const status = await checkKananaStatus();
+  res.json(status);
+});
+
+app.post("/api/prep/kanana/extract", async (req, res) => {
+  const { rawNote } = req.body;
+  if (!rawNote) {
+    return res.status(400).json({ error: "rawNote is required" });
+  }
+  try {
+    const extracted = await extractNoteWithKanana(rawNote);
+    res.json({ success: true, extracted });
+  } catch (err) {
+    res.status(500).json({ error: "Kanana extraction failed", details: err.message });
+  }
 });
 
 app.get("/api/prep/children/:childId", (req, res) => {

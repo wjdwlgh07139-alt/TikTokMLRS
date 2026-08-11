@@ -3000,3 +3000,235 @@ a:focus-visible {
   line-height: 1.6;
   font-size: 14.5px;
 }
+
+/* Modal Overlay & Raw Notes Drawer */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.modal-content.notes-drawer {
+  background: #FFFFFF;
+  width: 100%;
+  max-width: 480px;
+  max-height: 85vh;
+  border-top-left-radius: 24px;
+  border-top-right-radius: 24px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.2);
+  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+.modal-header {
+  padding: 20px;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #FFFFFF;
+}
+
+.modal-header h2 {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--ink);
+  margin: 0;
+}
+
+.close-btn {
+  background: #F3F4F6;
+  border: none;
+  font-size: 20px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--ink-2);
+}
+
+.modal-body {
+  padding: 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.raw-note-card {
+  background: #F8FAFC;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.raw-note-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px dashed var(--line);
+  padding-bottom: 8px;
+}
+
+.raw-date {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--cyan-deep);
+}
+
+.raw-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.raw-tag {
+  font-size: 11px;
+  font-weight: 700;
+  background: var(--cyan-soft);
+  color: var(--cyan-deep);
+  padding: 2px 8px;
+  border-radius: 100px;
+}
+
+.raw-text {
+  font-family: inherit;
+  font-size: 14.5px;
+  line-height: 1.65;
+  color: var(--ink);
+  white-space: pre-wrap;
+  word-break: break-word;
+  margin: 0;
+}
+
+/* Home Screen Rehearsal Recommendation Banner matching first-care-guide.html */
+.home-recommend-banner {
+  background: var(--card);
+  border-radius: var(--r);
+  padding: 20px;
+  border: 1px solid var(--line);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+  transition: all 0.2s ease;
+}
+
+.home-recommend-banner:hover {
+  border-color: var(--cyan);
+  box-shadow: 0 8px 20px rgba(84, 195, 229, 0.12);
+}
+
+.banner-left {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.banner-badge {
+  align-self: flex-start;
+  background: var(--cyan);
+  color: #FFFFFF;
+  font-size: 12.5px;
+  font-weight: 800;
+  padding: 4px 12px;
+  border-radius: 100px;
+  letter-spacing: -0.01em;
+}
+
+.banner-title {
+  font-size: 17.5px;
+  font-weight: 800;
+  color: var(--ink);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.banner-reason {
+  font-size: 14.5px;
+  color: var(--ink-2);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.banner-quote {
+  background: var(--cyan-soft);
+  color: var(--cyan-deep);
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.5;
+  border-left: 3px solid var(--cyan);
+}
+
+.banner-action-btn {
+  width: 100%;
+  background: var(--cyan);
+  color: #FFFFFF;
+  border: none;
+  padding: 13px 18px;
+  border-radius: 14px;
+  font-size: 15.5px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(84, 195, 229, 0.3);
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.banner-action-btn:hover {
+  background: var(--cyan-deep);
+}
+
+/* Prep Dashboard Container Spacing & Layout */
+.prep-container {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 0 16px 140px;
+  background: var(--bg);
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+.prep-container.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  gap: 16px;
+  color: var(--ink-2);
+  font-weight: 600;
+  text-align: center;
+  padding: 40px 20px;
+}

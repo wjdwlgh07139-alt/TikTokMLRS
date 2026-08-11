@@ -185,7 +185,22 @@ function Home({ onSelect, onStartRehearsalFromRec }) {
 
   return (
     <>
-      <RehearsalRecommendBanner onSelectRecommendation={onStartRehearsalFromRec} />
+      <div className="home-recommend-banner">
+        <div className="banner-left">
+          <span className="banner-badge">📋 수업 준비 도우미 v2</span>
+          <h3 className="banner-title">
+            수업 방문 전, <b>돌봄 노트 4블록 참고서</b>로 준비해 보세요
+          </h3>
+          <p className="banner-reason">
+            아동의 선호·진행 방식 파싱 정보를 기반으로 가져갈 준비물, 지난 회차 약속, 진행 패턴을 1분 만에 점검합니다.
+          </p>
+        </div>
+        <div className="banner-right">
+          <button className="banner-action-btn" onClick={() => window.location.hash = "/prep"}>
+            담당 아동 준비하기 ›
+          </button>
+        </div>
+      </div>
 
       <div className="hero">
 
