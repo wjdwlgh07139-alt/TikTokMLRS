@@ -5,6 +5,7 @@ import ClosingContact from "./components/ClosingContact.jsx";
 import TraitSelectorModal from "./components/TraitSelectorModal.jsx";
 import TraitTipCard from "./components/TraitTipCard.jsx";
 import BlindGuessModal from "./components/BlindGuessModal.jsx";
+import { MAX_USER_INPUT_CHARS, WARN_USER_INPUT_CHARS, WARN_INPUT_MESSAGE } from "./constants.js";
 
 const MOOD_LABEL = {
   1: "😟 많이 불안해요",
@@ -117,12 +118,32 @@ function Home({ onSelect }) {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  const handleStartScenario = (targetScenario) => {
+  const handleStartScenario = async (targetScenario) => {
     setSheetScenario(null);
-    if (targetScenario.group === "child") {
+    if (targetScenario.secondaryTraits && targetScenario.secondaryTraits.length > 0) {
       setTraitSelectingScenario(targetScenario);
     } else {
-      onSelect(targetScenario, { sessionId: null, trait: null, blindMode: false });
+      // 보조 성향이 없으면 직행
+      try {
+        const res = await fetch("/api/rehearsal/session", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            scenarioId: targetScenario.id,
+            blindMode: false,
+          }),
+        });
+        const data = await res.json();
+        onSelect(targetScenario, {
+          sessionId: data.sessionId,
+          trait: null,
+          blindMode: false,
+          openingLine: data.openingLine,
+          initialLevel: data.initialLevel,
+        });
+      } catch {
+        onSelect(targetScenario, { sessionId: null, trait: null, blindMode: false });
+      }
     }
   };
 
@@ -286,7 +307,9 @@ function Home({ onSelect }) {
               className="start-btn"
               onClick={() => handleStartScenario(sheetScenario)}
             >
-              성향 선택 / 연습 시작 →
+              {sheetScenario.secondaryTraits && sheetScenario.secondaryTraits.length > 0
+                ? "성향 선택 / 연습 시작 →"
+                : "연습 시작 →"}
             </button>
             <button
               className="close-btn"
@@ -323,7 +346,7 @@ function Chat({ scenario, sessionInfo, onDone, onExit }) {
     { role: "assistant", content: initialOpening },
   ]);
   const [mood, setMood] = useState(initialMood);
-  const [turnsLeft, setTurnsLeft] = useState(3);
+  const [turnsLeft, setTurnsLeft] = useState(scenario.turns || 3);
   const [done, setDone] = useState(false);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -469,10 +492,21 @@ function Chat({ scenario, sessionInfo, onDone, onExit }) {
           </button>
         ) : (
           <>
-            <div className="turns-hint">남은 대화 {turnsLeft}회</div>
+            <div className="turns-hint-bar">
+              <span className="turns-hint">남은 대화 {turnsLeft}회</span>
+              <span className={`char-counter ${input.length >= WARN_USER_INPUT_CHARS ? "warn" : ""}`}>
+                {input.length} / {MAX_USER_INPUT_CHARS}자
+              </span>
+            </div>
+            {input.length >= WARN_USER_INPUT_CHARS && (
+              <div className="char-warn-banner">
+                💡 {WARN_INPUT_MESSAGE}
+              </div>
+            )}
             <div className="input-row">
               <input
                 type="text"
+                maxLength={MAX_USER_INPUT_CHARS}
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
@@ -498,6 +532,33 @@ function Chat({ scenario, sessionInfo, onDone, onExit }) {
           onComplete={handleGuessComplete}
         />
       )}
+    </div>
+  );
+}
+
+function LevelTrajectoryChart({ history }) {
+  if (!history || history.length === 0) return null;
+  const levelLabels = { 0: "0 (편안)", 1: "1 (조심)", 2: "2 (위축)", 3: "3 (거부)" };
+
+  return (
+    <div className="review-section level-trajectory">
+      <h2>📈 아이의 감정 궤적 (내부 레벨)</h2>
+      <p className="section-desc">겉으로 협조적이어도 마음의 닫힘 정도는 다를 수 있어요:</p>
+      <div className="trajectory-bars">
+        {history.map((h, i) => (
+          <div key={i} className="tr-bar-item">
+            <span className="tr-turn">{h.turn === 0 ? "오프닝" : `${h.turn}턴`}</span>
+            <div className="tr-track">
+              <div
+                className={`tr-fill lvl-${h.level}`}
+                style={{ width: `${((h.level + 1) / 4) * 100}%` }}
+              >
+                {levelLabels[h.level] || `Level ${h.level}`}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
@@ -559,6 +620,7 @@ function Review({ scenario, transcript, extraInfo, onRetry, onHome }) {
   }
 
   const actualTrait = data?.actualTrait;
+  const isCheerful = scenario.id === "cheerful";
 
   return (
     <>
@@ -569,6 +631,17 @@ function Review({ scenario, transcript, extraInfo, onRetry, onHome }) {
           {actualTrait && <span className="trait-badge"> · {actualTrait.label}</span>}
         </p>
       </div>
+
+      {/* 조기 종료 배너 */}
+      {data.isEarlyTermination && (
+        <div className="early-termination-banner">
+          <span className="icon">⚠️</span>
+          <div className="text">
+            <b>목표 턴 수({data.targetTurns}턴)에 도달하기 전에 대화가 종료되었습니다.</b>
+            <p>역량 평가 점수가 생략되며, 대화 내용과 감정 변화 궤적을 중심으로 확인하세요.</p>
+          </div>
+        </div>
+      )}
 
       {guessResult && (
         <div className={`guess-summary-card ${guessResult.isCorrect ? "success" : "miss"}`}>
@@ -587,8 +660,57 @@ function Review({ scenario, transcript, extraInfo, onRetry, onHome }) {
         </div>
       )}
 
-      {/* 성향 실패 트리거 감지 결과 */}
-      {data.triggeredFails?.length > 0 && (
+      {/* 대화 발화 분석 (길이 & 점유 비율) */}
+      {data.utteranceStats && (
+        <div className="review-section utterance-stats">
+          <h2>💬 대화 발화 분석 (길이 & 점유 비율)</h2>
+          <p className="section-desc">한 번에 긴 발화를 하면 아이가 부담을 느껴 마음을 닫을 수 있습니다:</p>
+          <div className="stats-comparison-grid">
+            <div className="stat-card teacher">
+              <div className="st-role">선생님 발화</div>
+              <div className="st-ratio">{data.utteranceStats.teacherRatio}%</div>
+              <div className="st-avg">평균 <b>{data.utteranceStats.teacherAvgLen}자</b> / 턴</div>
+            </div>
+            <div className="stat-card child">
+              <div className="st-role">아이 반응</div>
+              <div className="st-ratio">{data.utteranceStats.childRatio}%</div>
+              <div className="st-avg">평균 <b>{data.utteranceStats.childAvgLen}자</b> / 턴</div>
+            </div>
+          </div>
+          <div className="ratio-bar-track">
+            <div className="ratio-bar teacher" style={{ width: `${data.utteranceStats.teacherRatio}%` }}>
+              선생님 {data.utteranceStats.teacherRatio}%
+            </div>
+            <div className="ratio-bar child" style={{ width: `${data.utteranceStats.childRatio}%` }}>
+              아이 {data.utteranceStats.childRatio}%
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 감정 궤적 차트 */}
+      {data.levelHistory?.length > 0 && (
+        <LevelTrajectoryChart history={data.levelHistory} />
+      )}
+
+      {/* silent 유형: 상호작용 누락 체크리스트 */}
+      {data.feedbackType === "silent" && data.checklists?.length > 0 && (
+        <div className="review-section silent-checklists">
+          <h2>🔍 상호작용 체크리스트</h2>
+          <p className="section-desc">아이가 부정 신호를 주지 않더라도 체크해야 할 핵심 요소입니다:</p>
+          <div className="checklist-grid">
+            {data.checklists.map((c, i) => (
+              <div key={i} className="checklist-item">
+                <span className="chk-icon">✅</span>
+                <span className="chk-label">{c.label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* signal 유형: 실패 트리거 감지 결과 */}
+      {data.feedbackType === "signal" && data.triggeredFails?.length > 0 && (
         <div className="review-section fail-triggers">
           <h2>⚠️ 실패 트리거 감지</h2>
           <p className="section-desc">대화 중 아이가 위축되거나 반응이 돌아선 순간입니다:</p>
@@ -617,23 +739,29 @@ function Review({ scenario, transcript, extraInfo, onRetry, onHome }) {
         </div>
       )}
 
-      {/* 성향별 루브릭 항목 */}
-      {data.traitScores?.length > 0 && (
+      {/* 성향/시나리오 맞춤 루브릭 */}
+      {data.traitScores?.length > 0 && !isCheerful && !data.isEarlyTermination && (
         <div className="review-section trait-rubric">
-          <h2>🎯 성향 맞춤 대응 평가</h2>
+          <h2>🎯 성향/시나리오 맞춤 대응 평가</h2>
           <div className="trait-rubric-list">
             {data.traitScores.map((item, i) => (
               <div key={i} className="trait-rubric-card">
                 <div className="tr-header">
                   <span className="tr-question">{item.question}</span>
                   <span className="tr-score">
-                    <b>{item.score}</b> / {item.max || 3}점
+                    {item.status === "no_opportunity" ? (
+                      <span className="no-opp-tag">➖ 기회 없음 (평가 제외)</span>
+                    ) : item.status === "missed" ? (
+                      <span className="missed-tag">⚠️ 기회 놓침 (0점)</span>
+                    ) : (
+                      <>
+                        <b>{item.score}</b> / {item.max || 3}점
+                      </>
+                    )}
                   </span>
                 </div>
                 {item.evidence && (
-                  <div className="tr-evidence">
-                    💬 근거: "{item.evidence}"
-                  </div>
+                  <div className="tr-evidence">💬 근거: "{item.evidence}"</div>
                 )}
               </div>
             ))}
@@ -641,15 +769,22 @@ function Review({ scenario, transcript, extraInfo, onRetry, onHome }) {
         </div>
       )}
 
-      {data.rubric?.length > 0 && (
+      {/* 기본 역량 평가 (활발한 아이 / 조기 종료 시 생략) */}
+      {!isCheerful && !data.isEarlyTermination && data.rubric?.length > 0 && (
         <div className="review-section">
           <h2>기본 역량 평가</h2>
           <div className="rubric-grid">
             {data.rubric.map((r, i) => (
               <div key={i} className="rubric-row">
                 <span className="name">{r.name}</span>
-                <MoodGauge mood={r.score} />
-                <span className="score">{r.score}/5</span>
+                {r.status === "no_opportunity" || r.score === null ? (
+                  <span className="no-opp-tag">➖ 기회 없음</span>
+                ) : (
+                  <>
+                    <MoodGauge mood={r.score} />
+                    <span className="score">{r.score}/5</span>
+                  </>
+                )}
               </div>
             ))}
           </div>

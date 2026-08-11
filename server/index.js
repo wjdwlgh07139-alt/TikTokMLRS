@@ -76,6 +76,25 @@ function toGeminiContents(messages) {
   }));
 }
 
+app.get("/api/scenarios", (req, res) => {
+  const list = PERSONAS.map((p) => ({
+    id: p.id,
+    group: p.group,
+    emoji: p.emoji,
+    title: p.title,
+    situation: p.situation,
+    tags: p.tags,
+    level: p.level,
+    turns: p.turns,
+    initialLevel: p.initialLevel ?? 1,
+    openingLine: p.openingLine,
+    feedbackType: p.feedbackType || "signal",
+    checklists: p.checklists || [],
+    secondaryTraits: p.secondaryTraits || [],
+  }));
+  res.json(list);
+});
+
 app.get("/api/traits", (req, res) => {
   const list = traitsData.map(({ id, label, summary }) => ({
     id,
@@ -93,14 +112,18 @@ app.post("/api/rehearsal/session", (req, res) => {
     traitId = getRandomTraitId();
   }
 
+  const persona = PERSONAS.find((p) => p.id === scenarioId);
   const trait = traitsData.find((t) => t.id === traitId) || null;
   const sessionId = "sess_" + Date.now() + "_" + Math.random().toString(36).slice(2, 7);
+
+  const initialLevel = trait?.initialLevel ?? persona?.initialLevel ?? 1;
 
   const sessionObj = {
     sessionId,
     scenarioId,
     traitId: trait ? trait.id : null,
     blindMode: Boolean(blindMode),
+    levelHistory: [{ turn: 0, level: initialLevel }],
     createdAt: Date.now(),
   };
 
@@ -108,8 +131,8 @@ app.post("/api/rehearsal/session", (req, res) => {
 
   const responseData = {
     sessionId,
-    openingLine: trait?.openingLine || null,
-    initialLevel: trait?.initialLevel ?? null,
+    openingLine: trait?.openingLine || persona?.openingLine || null,
+    initialLevel,
   };
 
   if (trait && !blindMode) {
@@ -130,15 +153,22 @@ app.post("/api/roleplay", async (req, res) => {
   try {
     const { scenarioId: reqScenarioId, sessionId, traitId: reqTraitId, messages } = req.body || {};
 
+    const convo = Array.isArray(messages) ? messages : [];
+    const lastUserMsg = convo.filter((m) => m.role === "user").pop();
+    if (lastUserMsg && lastUserMsg.content && lastUserMsg.content.length > MAX_USER_INPUT_CHARS) {
+      return res.status(400).json({ error: `입력 글자 수가 ${MAX_USER_INPUT_CHARS}자를 초과했습니다.` });
+    }
+
     let scenarioId = reqScenarioId;
     let traitId = reqTraitId;
     let blindMode = false;
+    let sessionObj = null;
 
     if (sessionId && SESSIONS.has(sessionId)) {
-      const sess = SESSIONS.get(sessionId);
-      scenarioId = scenarioId || sess.scenarioId;
-      traitId = traitId || sess.traitId;
-      blindMode = sess.blindMode;
+      sessionObj = SESSIONS.get(sessionId);
+      scenarioId = scenarioId || sessionObj.scenarioId;
+      traitId = traitId || sessionObj.traitId;
+      blindMode = sessionObj.blindMode;
     }
 
     if (traitId === "random") {
@@ -152,13 +182,13 @@ app.post("/api/roleplay", async (req, res) => {
 
     const trait = traitsData.find((t) => t.id === traitId) || null;
 
-    const convo = Array.isArray(messages) ? messages : [];
     const userTurns = convo.filter((m) => m.role === "user").length;
     const maxTurns = persona.turns || MAX_TURNS;
     const isFinal = userTurns >= maxTurns;
 
     let system = composeSystemPrompt({
       scenarioPersona: persona.persona,
+      personaObj: persona,
       trait,
       blindMode,
     });
@@ -195,6 +225,16 @@ app.post("/api/roleplay", async (req, res) => {
     }
 
     result.mood = clampMood(result.mood);
+    // level 결정 (0~3)
+    if (result.level === undefined || result.level === null) {
+      result.level = Math.max(0, Math.min(3, 4 - result.mood));
+    }
+
+    if (sessionObj) {
+      if (!sessionObj.levelHistory) sessionObj.levelHistory = [];
+      sessionObj.levelHistory.push({ turn: userTurns, level: result.level });
+    }
+
     if (isFinal) result.done = true;
     result.turnsLeft = Math.max(0, maxTurns - userTurns);
 
@@ -213,13 +253,51 @@ app.post("/api/review", async (req, res) => {
     }
 
     let traitId = reqTraitId;
+    let sessionObj = null;
     if (sessionId && SESSIONS.has(sessionId)) {
-      const sess = SESSIONS.get(sessionId);
-      traitId = traitId || sess.traitId;
+      sessionObj = SESSIONS.get(sessionId);
+      traitId = traitId || sessionObj.traitId;
     }
 
+    const persona = PERSONAS.find((p) => p.title === title || p.id === sessionObj?.scenarioId);
     const trait = traitsData.find((t) => t.id === traitId) || null;
-    const system = composeReviewPrompt({ title, transcript, trait });
+
+    // 대화 턴 수 계산 (선생님의 발화 개수)
+    const turnMatches = (transcript.match(/\[\d+턴\]/g) || []).length;
+    const targetTurns = persona?.turns || 3;
+    const isEarlyTermination = turnMatches > 0 && turnMatches < targetTurns;
+
+    // 발화 길이에 관한 통계 계산 (선생님 vs 아이)
+    const lines = transcript.split("\n");
+    let teacherTotal = 0, teacherCount = 0;
+    let childTotal = 0, childCount = 0;
+
+    lines.forEach((line) => {
+      if (line.includes("선생님:")) {
+        const text = line.replace(/\[.*?\]\s*선생님:\s*/, "");
+        teacherTotal += text.length;
+        teacherCount++;
+      } else if (line.includes("아이:")) {
+        const text = line.replace(/\[.*?\]\s*아이:\s*/, "");
+        childTotal += text.length;
+        childCount++;
+      }
+    });
+
+    const totalChars = teacherTotal + childTotal || 1;
+    const utteranceStats = {
+      teacherAvgLen: teacherCount ? Math.round(teacherTotal / teacherCount) : 0,
+      childAvgLen: childCount ? Math.round(childTotal / childCount) : 0,
+      teacherRatio: Math.round((teacherTotal / totalChars) * 100),
+      childRatio: Math.round((childTotal / totalChars) * 100),
+    };
+
+    const system = composeReviewPrompt({
+      title: persona?.title || title,
+      transcript,
+      trait,
+      persona,
+    });
 
     const response = await ai.models.generateContent({
       model: MODEL_REVIEW,
@@ -242,6 +320,14 @@ app.post("/api/review", async (req, res) => {
       console.error("[review parse error]", err, text);
       return res.status(500).json({ error: "review parsing failed" });
     }
+
+    result.targetTurns = targetTurns;
+    result.actualTurns = turnMatches || targetTurns;
+    result.isEarlyTermination = isEarlyTermination;
+    result.feedbackType = persona?.feedbackType || "signal";
+    result.checklists = persona?.checklists || [];
+    result.levelHistory = sessionObj?.levelHistory || [];
+    result.utteranceStats = utteranceStats;
 
     if (trait) {
       result.actualTrait = {

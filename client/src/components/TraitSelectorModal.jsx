@@ -17,6 +17,12 @@ export default function TraitSelectorModal({ scenario, onConfirm, onClose }) {
     });
   };
 
+  // secondaryTraits가 지정된 경우 해당 보조 성향만 필터링
+  const secondaryAllowed = scenario?.secondaryTraits || [];
+  const filteredTraits = secondaryAllowed.length > 0
+    ? traits.filter((t) => secondaryAllowed.includes(t.id))
+    : traits;
+
   return (
     <div className="scrim open" onClick={(e) => e.target.classList.contains("scrim") && onClose()}>
       <div className="sheet trait-selector-sheet" role="dialog" aria-modal="true">
@@ -26,9 +32,9 @@ export default function TraitSelectorModal({ scenario, onConfirm, onClose }) {
             {scenario.emoji}
           </div>
           <div>
-            <h2>아이 성향(Trait) 선택</h2>
+            <h2>아이 보조 성향(Trait) 선택</h2>
             <div className="sh-age">
-              {scenario.title} · 같은 상황이라도 아이 성향에 따라 반응이 달라집니다
+              {scenario.title} · 시나리오에 결합할 보조 성향을 선택해 보세요.
             </div>
           </div>
         </div>
@@ -69,19 +75,8 @@ export default function TraitSelectorModal({ scenario, onConfirm, onClose }) {
             <div className="tc-summary">시나리오 기본 설정대로 대화를 진행합니다.</div>
           </button>
 
-          {/* 랜덤 */}
-          <button
-            type="button"
-            className={`trait-card ${selectedTraitId === "random" ? "selected" : ""}`}
-            onClick={() => setSelectedTraitId("random")}
-          >
-            <div className="tc-badge random">🎲</div>
-            <div className="tc-label">랜덤 성향</div>
-            <div className="tc-summary">6가지 성향 중 무작위로 적용되어 시작합니다.</div>
-          </button>
-
-          {/* 6종 성향 */}
-          {traits.map((t) => (
+          {/* 보조 성향 목록 */}
+          {filteredTraits.map((t) => (
             <button
               key={t.id}
               type="button"
