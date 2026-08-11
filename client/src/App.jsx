@@ -146,6 +146,8 @@ function Home({ onSelect }) {
         trait: data.trait || null,
         blindMode,
         traitId,
+        openingLine: data.openingLine || data.trait?.openingLine,
+        initialLevel: data.initialLevel ?? data.trait?.initialLevel,
       });
     } catch {
       onSelect(targetScenario, {
@@ -309,10 +311,18 @@ function Home({ onSelect }) {
 }
 
 function Chat({ scenario, sessionInfo, onDone, onExit }) {
+  const { sessionId, trait, blindMode, traitId, openingLine, initialLevel } = sessionInfo || {};
+
+  const initialMood = initialLevel !== null && initialLevel !== undefined
+    ? Math.max(1, Math.min(5, 4 - initialLevel))
+    : scenario.mood0;
+
+  const initialOpening = openingLine || scenario.opening;
+
   const [log, setLog] = useState([
-    { role: "assistant", content: scenario.opening },
+    { role: "assistant", content: initialOpening },
   ]);
-  const [mood, setMood] = useState(scenario.mood0);
+  const [mood, setMood] = useState(initialMood);
   const [turnsLeft, setTurnsLeft] = useState(3);
   const [done, setDone] = useState(false);
   const [input, setInput] = useState("");
@@ -322,8 +332,6 @@ function Chat({ scenario, sessionInfo, onDone, onExit }) {
   const [fetchedActualTrait, setFetchedActualTrait] = useState(null);
 
   const logEndRef = useRef(null);
-
-  const { sessionId, trait, blindMode, traitId } = sessionInfo || {};
 
   useEffect(() => {
     logEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });

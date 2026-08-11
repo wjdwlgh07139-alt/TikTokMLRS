@@ -108,6 +108,8 @@ app.post("/api/rehearsal/session", (req, res) => {
 
   const responseData = {
     sessionId,
+    openingLine: trait?.openingLine || null,
+    initialLevel: trait?.initialLevel ?? null,
   };
 
   if (trait && !blindMode) {
@@ -116,6 +118,8 @@ app.post("/api/rehearsal/session", (req, res) => {
       label: trait.label,
       tips: trait.tips,
       exampleLines: trait.exampleLines,
+      initialLevel: trait.initialLevel,
+      openingLine: trait.openingLine,
     };
   }
 
