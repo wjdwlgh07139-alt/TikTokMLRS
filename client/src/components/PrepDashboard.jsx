@@ -256,38 +256,65 @@ export default function PrepDashboard({ childIdParam, onNavigate, onStartRehears
   if (!selectedChildId) {
     return (
       <div className="prep-container">
-        <div className="prep-hero">
-          <h1>📋 수업 준비 도우미</h1>
-          <p className="sub">
-            방문 전 담당 아동의 돌봄 노트를 분석하여 준비물 체크리스트와 맞춤 리허설을 추천해드려요.
+        {/* Sticky Appbar */}
+        <div className="appbar">
+          <span className="back" onClick={() => onNavigate("/")} aria-label="홈으로">
+            ‹
+          </span>
+          <span className="ttl">수업 준비 도우미</span>
+          <span className="sp"></span>
+        </div>
+
+        {/* Hero Header */}
+        <div className="hero">
+          <span className="chip">담당 아동 {childrenList.length}명</span>
+          <h1>
+            수업 전, <b>돌봄 노트</b>로 아이 성향을 확인하세요
+          </h1>
+          <p>
+            방문 전 담당 아동의 돌봄 노트를 분석하여 준비물 체크리스트와 맞춤 리허설을 추천해 드립니다.
           </p>
         </div>
 
-        <div className="prep-child-section">
-          <h2 className="section-title">담당 아동 목록</h2>
-          <div className="prep-child-grid">
-            {childrenList.map((child) => (
-              <div
-                key={child.id}
-                className="prep-child-card"
-                onClick={() => onNavigate(`/prep/${child.id}`)}
-              >
-                <div className="child-avatar">{child.gender === "여아" ? "👧" : "👦"}</div>
-                <div className="child-info">
-                  <div className="child-header">
-                    <span className="child-name">{child.childName}</span>
-                    <span className="child-age">{child.ageMonths}개월 ({child.gender})</span>
+        <div className="pad">
+          <div className="sec" style={{ marginTop: "16px" }}>
+            <div className="sec-h">
+              <span className="sec-n">✓</span>
+              <span className="sec-t">담당 아동 선택</span>
+            </div>
+
+            <div className="prep-child-list">
+              {childrenList.map((child) => {
+                const name = child.childName || child.name || "아동";
+                const age = child.ageMonths || child.age || 0;
+                const genderStr = child.gender || "";
+                const noteCnt = child.noteCount ?? child.notesCount ?? child.totalNotesCount ?? 0;
+                return (
+                  <div
+                    key={child.id}
+                    className="check-child-card"
+                    onClick={() => onNavigate(`/prep/${child.id}`)}
+                  >
+                    <div className="child-avatar-circle">
+                      {genderStr === "여아" ? "👧" : "👦"}
+                    </div>
+                    <div className="child-card-main">
+                      <div className="child-card-title-row">
+                        <span className="child-card-name">{name}</span>
+                        <span className="child-card-age">{age}개월 ({genderStr})</span>
+                      </div>
+                      <div className="child-card-sub">
+                        📝 돌봄 노트 <b>{noteCnt}건</b>
+                        {child.lastDate && <span> · 최근: {child.lastDate}</span>}
+                      </div>
+                    </div>
+                    <button className="btn-child-select">
+                      준비하기 ›
+                    </button>
                   </div>
-                  <div className="child-meta">
-                    <span className="note-count">📝 돌봄 노트 <strong>{child.noteCount}건</strong></span>
-                    {child.lastDate && <span className="last-date">최근: {child.lastDate}</span>}
-                  </div>
-                </div>
-                <button className="prep-btn">
-                  준비하기 &rsaquo;
-                </button>
-              </div>
-            ))}
+                );
+              })}
+            </div>
           </div>
         </div>
       </div>
@@ -320,113 +347,120 @@ export default function PrepDashboard({ childIdParam, onNavigate, onStartRehears
 
   return (
     <div className="prep-container">
-      {/* Top Header */}
-      <div className="prep-header-bar">
-        <button className="back-link-btn" onClick={() => onNavigate("/prep")}>
-          &lsaquo; 목록으로
+      {/* Sticky Appbar matching first-care-guide.html */}
+      <div className="appbar">
+        <button className="back" onClick={() => onNavigate("/prep")} aria-label="뒤로">
+          ‹
         </button>
-        <div className="child-profile-pill">
-          <span className="emoji">{gender === "여아" ? "👧" : "👦"}</span>
-          <span className="name">{childName}</span>
-          <span className="details">{ageMonths}개월 · 노트 {totalNotesCount}건</span>
-        </div>
-        <button className="raw-notes-btn" onClick={handleOpenRawNotes}>
-          📄 원문 노트 보기
+        <span className="ttl">수업 준비 도우미</span>
+        <button className="btn-raw-link" onClick={handleOpenRawNotes}>
+          원문 노트 보기
         </button>
       </div>
 
-      {/* 0-Notes Empty Case */}
-      {blockMode === "hidden" && (
-        <div className="prep-empty-banner">
-          <h3>🌱 첫 방문 안내</h3>
-          <p>아직 작성된 돌봄 노트가 없습니다. 첫 대면 시 안전 수칙 및 기본 인사를 점검해두세요!</p>
-        </div>
-      )}
+      {/* Hero Header matching first-care-guide.html */}
+      <div className="hero">
+        <span className="chip">
+          {childName} · {ageMonths}개월 ({gender})
+        </span>
+        <h1>
+          방문 전, <b>돌봄 노트 준비</b><br />이것만 챙기면 충분해요
+        </h1>
+        <p>
+          총 <b>{totalNotesCount}건</b>의 작성된 돌봄 노트를 분석하여 전달하는 맞춤 리허설 및 준비물 체크리스트입니다.
+        </p>
+      </div>
 
-      {/* Tool B: Rehearsal Recommendation Cards */}
-      {recommendations && recommendations.length > 0 && (
-        <div className="rec-section">
-          <div className="rec-section-header">
-            <h3>🎭 맞춤 리허설 추천 (도구 B)</h3>
-            <span className="sub-tag">노트 관찰 신호 기반</span>
+      <div className="pad">
+        {/* 0-Notes Empty Case */}
+        {blockMode === "hidden" && (
+          <div className="sec">
+            <div className="check">
+              <p className="check-t">🌱 첫 방문 안내</p>
+              <p className="check-s">
+                아직 작성된 돌봄 노트가 없습니다. 첫 대면 시 안전 수칙 및 기본 인사를 점검해두세요!
+              </p>
+            </div>
           </div>
+        )}
 
-          <div className="rec-cards-wrapper">
-            {recommendations.map((rec, idx) => (
-              <div key={idx} className={`rec-card ${rec.strength}`}>
-                <div className="rec-card-top">
-                  <span className="rec-emoji">{rec.emoji}</span>
-                  <div className="rec-title-box">
-                    <div className="rec-badge-row">
-                      <span className={`badge ${rec.strength}`}>{rec.badge}</span>
-                      {rec.date && <span className="rec-date">관찰일: {rec.date}</span>}
+        {/* Tool B: Rehearsal Recommendation Cards */}
+        {recommendations && recommendations.length > 0 && (
+          <div className="sec">
+            <div className="sec-h">
+              <span className="sec-n">1</span>
+              <span className="sec-t">맞춤 리허설 추천 (도구 B)</span>
+              <span className="cnt">신호 궤적</span>
+            </div>
+            <p className="sec-d">노트 관찰 신호에 기반하여 배정 직후 연습할 모의 리허설을 추천해 드립니다.</p>
+
+            <div className="check" style={{ marginBottom: "16px" }}>
+              {recommendations.map((rec, idx) => (
+                <div key={idx} className="step" style={{ padding: "12px 0", borderBottom: idx < recommendations.length - 1 ? "1px solid var(--line)" : "none" }}>
+                  <div className="step-hd" style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "8px" }}>
+                    <span className="num" style={{ width: "32px", height: "32px", fontSize: "18px" }}>{rec.emoji}</span>
+                    <div>
+                      <span className="step-t" style={{ fontSize: "17px", fontWeight: 800 }}>{rec.title}</span>
+                      <div style={{ display: "flex", gap: "8px", alignItems: "center", marginTop: "2px" }}>
+                        <span className="chip" style={{ background: rec.strength === "strong" ? "var(--cyan)" : "var(--pink)", padding: "2px 8px", fontSize: "11px" }}>{rec.badge}</span>
+                        {rec.date && <span style={{ fontSize: "12px", color: "var(--ink-3)" }}>관찰일: {rec.date}</span>}
+                      </div>
                     </div>
-                    <h4>{rec.title}</h4>
                   </div>
-                </div>
 
-                <p className="rec-reason">{rec.reason}</p>
+                  <p className="step-why" style={{ marginTop: "8px" }}>{rec.reason}</p>
 
-                {rec.quote && rec.quote !== "첫 방문 필수 추천" && (
-                  <div className="rec-quote-box">
-                    <span className="quote-icon">“</span>
-                    <span className="quote-text">{rec.quote}</span>
-                    <span className="quote-icon">”</span>
-                  </div>
-                )}
+                  {rec.quote && rec.quote !== "첫 방문 필수 추천" && (
+                    <div className="say">
+                      &quot;{rec.quote}&quot;
+                    </div>
+                  )}
 
-                <div className="rec-card-footer">
                   <button
                     className="start-rehearsal-btn"
                     onClick={() => onStartRehearsal(rec.scenarioId, rec.traitId)}
                   >
-                    이 시나리오 리허설하기 &rarr;
+                    이 시나리오 리허설하기 ›
                   </button>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Tool A: Class Prep Checklist Blocks */}
-      <div className="prep-blocks-container">
-        {/* Block 1: 가져갈 것 (Materials Checklist) */}
+        {/* Tool A: Class Prep Checklist Blocks */}
         {materialsChecklist && materialsChecklist.length > 0 && (
-          <div className="prep-block bring-block">
-            <div className="block-header">
-              <span className="block-icon">🎒</span>
-              <div>
-                <h3>가져갈 것</h3>
-                <span className="block-sub">최근 3회 사용 빈도 및 최근성 기반 추천</span>
-              </div>
+          <div className="sec">
+            <div className="sec-h">
+              <span className="sec-n">2</span>
+              <span className="sec-t">가져갈 준비물 (도구 A)</span>
+              <span className="cnt">{materialsChecklist.length}</span>
             </div>
 
-            <div className="materials-list">
+            <div className="check">
+              <p className="check-t">아이가 좋아하는 놀이 준비물</p>
+              <p className="check-s">최근 3회 사용 빈도 및 최근성을 분석한 준비물 추천 항목입니다.</p>
+
               {materialsChecklist.map((item, idx) => {
                 const isChecked = checkedMaterials[item.name] || false;
                 return (
-                  <div
+                  <label
                     key={idx}
-                    className={`material-item ${item.exhausted ? "exhausted" : ""} ${
-                      isChecked ? "checked" : ""
-                    }`}
+                    className="ck"
                     onClick={() => toggleMaterialCheck(item.name)}
                   >
                     <input
                       type="checkbox"
                       checked={isChecked}
                       onChange={() => {}}
-                      id={`mat-${idx}`}
                     />
-                    <label htmlFor={`mat-${idx}`}>{item.name}</label>
-
-                    {item.exhausted && (
-                      <span className="exhausted-badge" title={item.exhaustedWarning}>
-                        ⚠️ 3회 연속 (교체/심화 권장)
-                      </span>
-                    )}
-                  </div>
+                    <span>
+                      <em>{item.name}</em>
+                      {item.exhausted && (
+                        <i>⚠️ 3회 연속 사용됨 — 심화 놀이로 발전시키거나 교체를 고려하세요.</i>
+                      )}
+                    </span>
+                  </label>
                 );
               })}
             </div>
@@ -435,21 +469,17 @@ export default function PrepDashboard({ childIdParam, onNavigate, onStartRehears
 
         {/* Block 2: 이어가기 (Unfinished Items) */}
         {unfinishedItems && unfinishedItems.length > 0 && (
-          <div className="prep-block unfinished-block">
-            <div className="block-header">
-              <span className="block-icon">🔗</span>
-              <div>
-                <h3>이어가기</h3>
-                <span className="block-sub">지난 수업의 미완결 관심사 및 약속</span>
-              </div>
+          <div className="sec">
+            <div className="sec-h">
+              <span className="sec-n">3</span>
+              <span className="sec-t">지난 수업 약속 이어가기</span>
             </div>
-
-            <div className="unfinished-list">
+            <div className="check">
               {unfinishedItems.map((item, idx) => (
-                <div key={idx} className="unfinished-item-card">
-                  <div className="unf-date">{item.date} 수업 노트</div>
-                  <div className="unf-content">{item.content}</div>
-                  <div className="unf-quote">원문 인용: &quot;{item.quote}&quot;</div>
+                <div key={idx} className="step" style={{ padding: "12px 0", borderBottom: "none" }}>
+                  <p className="step-t" style={{ fontSize: "16px", fontWeight: 800 }}>{item.content}</p>
+                  <p className="say" style={{ marginTop: "8px" }}>&quot;{item.quote}&quot;</p>
+                  <p className="check-s" style={{ marginTop: "6px", fontSize: "13px" }}>관찰일: {item.date}</p>
                 </div>
               ))}
             </div>
@@ -458,62 +488,62 @@ export default function PrepDashboard({ childIdParam, onNavigate, onStartRehears
 
         {/* Block 3: 검증된 것 (Verified Success) */}
         {verifiedSuccess && verifiedSuccess.length > 0 && (
-          <div className="prep-block verified-block">
-            <div className="block-header">
-              <span className="block-icon">✨</span>
-              <div>
-                <h3>검증된 것</h3>
-                <span className="block-sub">2회 이상 높은 흥미와 긍정적 반응을 얻은 활동</span>
-              </div>
+          <div className="sec">
+            <div className="sec-h">
+              <span className="sec-n">4</span>
+              <span className="sec-t">검증된 성공 경험</span>
+              <span className="cnt">{verifiedSuccess.length}</span>
             </div>
-
-            <div className="verified-tags">
-              {verifiedSuccess.map((v, idx) => (
-                <span key={idx} className="verified-tag">
-                  💚 {v.tag} <small>({v.count}회 성공)</small>
-                </span>
-              ))}
+            <div className="check">
+              <p className="check-s">2회 이상 높은 흥미와 긍정적 반응을 얻은 활동입니다.</p>
+              <div style={{ marginTop: "12px", display: "flex", flexWrap: "wrap", gap: "8px" }}>
+                {verifiedSuccess.map((v, idx) => (
+                  <span key={idx} className="chip" style={{ background: "var(--cyan-soft)", color: "var(--cyan-deep)" }}>
+                    ✨ {v.tag} <b>({v.count}회 성공)</b>
+                  </span>
+                ))}
+              </div>
             </div>
           </div>
         )}
 
         {/* Block 4: 새로 시도 (New Try) */}
         {newTryActivities && newTryActivities.length > 0 && (
-          <div className="prep-block newtry-block">
-            <div className="block-header">
-              <span className="block-icon">💡</span>
-              <div>
-                <h3>새로 시도</h3>
-                <span className="block-sub">최근 4회 수업에서 시도하지 않은 미출현 활동</span>
-              </div>
+          <div className="sec">
+            <div className="sec-h">
+              <span className="sec-n">5</span>
+              <span className="sec-t">새로 시도할 놀이</span>
             </div>
-
-            <div className="newtry-tags">
-              {newTryActivities.map((tag, idx) => (
-                <span key={idx} className="newtry-tag">
-                  🔹 {tag}
-                </span>
-              ))}
+            <div className="check">
+              <p className="check-s">최근 4회 수업에서 시도하지 않은 미출현 활동 아이디어입니다.</p>
+              <div style={{ marginTop: "12px", display: "flex", flexWrap: "wrap", gap: "8px" }}>
+                {newTryActivities.map((tag, idx) => (
+                  <span key={idx} className="chip" style={{ background: "#F3F4F6", color: "var(--ink-2)" }}>
+                    💡 {tag}
+                  </span>
+                ))}
+              </div>
             </div>
           </div>
         )}
 
         {/* Block 5: 변화 추이 (Trajectory Trends for 8+ notes) */}
         {trajectoryTrend && (
-          <div className="prep-block trend-block">
-            <div className="block-header">
-              <span className="block-icon">📈</span>
-              <div>
-                <h3>변화 추이</h3>
-                <span className="block-sub">{trajectoryTrend.summary}</span>
+          <div className="sec">
+            <div className="sec-h">
+              <span className="sec-n">6</span>
+              <span className="sec-t">반응 변화 추이 분석</span>
+            </div>
+            <div className="check">
+              <p className="check-t">{trajectoryTrend.summary}</p>
+              <div style={{ marginTop: "12px" }}>
+                {trajectoryTrend.points.map((pt, idx) => (
+                  <p key={idx} className="say" style={{ marginTop: "8px" }}>
+                    • {pt}
+                  </p>
+                ))}
               </div>
             </div>
-
-            <ul className="trend-points">
-              {trajectoryTrend.points.map((pt, idx) => (
-                <li key={idx}>{pt}</li>
-              ))}
-            </ul>
           </div>
         )}
       </div>
