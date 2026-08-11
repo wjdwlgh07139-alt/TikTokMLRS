@@ -160,7 +160,10 @@ app.get("/api/health", (req, res) => {
   res.json({ ok: true, roleplay: MODEL_ROLEPLAY, review: MODEL_REVIEW });
 });
 
-app.get(["/contact/*", "/contact"], (req, res) => {
+app.get("*", (req, res) => {
+  if (req.path.startsWith("/api")) {
+    return res.status(404).json({ error: "API endpoint not found" });
+  }
   res.sendFile(path.join(distPath, "index.html"), (err) => {
     if (err) res.status(404).send("Page not found");
   });

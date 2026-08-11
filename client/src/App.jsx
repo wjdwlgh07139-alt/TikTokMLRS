@@ -38,7 +38,6 @@ function BottomTabBar({ currentPath, onNavigate }) {
   const tabs = [
     { id: "/", label: "리허설", icon: "🎭" },
     { id: "/contact/matching", label: "첫 연락", icon: "🤝" },
-    { id: "/contact/closing", label: "종료 메시지", icon: "📝" },
   ];
 
   return (
@@ -560,7 +559,9 @@ export default function App() {
     <div className="app">
       {currentPath === "/contact/matching" && <MatchingContact />}
 
-      {currentPath === "/contact/closing" && <ClosingContact />}
+      {(currentPath === "/careendtemplete" ||
+        currentPath === "/careendtemplate" ||
+        currentPath === "/contact/closing") && <ClosingContact />}
 
       {currentPath === "/" && (
         <>
@@ -586,7 +587,11 @@ export default function App() {
         </>
       )}
 
-      <BottomTabBar currentPath={currentPath} onNavigate={handleNavigate} />
+      {currentPath !== "/careendtemplete" &&
+        currentPath !== "/careendtemplate" &&
+        currentPath !== "/contact/closing" && (
+          <BottomTabBar currentPath={currentPath} onNavigate={handleNavigate} />
+        )}
     </div>
   );
 }
