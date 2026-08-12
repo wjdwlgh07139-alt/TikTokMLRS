@@ -30,6 +30,7 @@ function getRandomTraitId() {
 const MODEL_ROLEPLAY = "gemini-3.5-flash-lite"; // 저비용·고빈도 역할극용
 const MODEL_REVIEW = "gemini-3.5-flash-lite"; // 평가용. flash 말고 flash-lite도 은근 쓸만함
 const MAX_TURNS = 3;
+const MAX_USER_INPUT_CHARS = 500;
 
 if (!process.env.GEMINI_API_KEY) {
   console.error(
@@ -44,13 +45,66 @@ app.use(express.json());
 app.use(express.static(distPath));
 
 function extractJSON(text) {
-  const cleaned = text.replace(/```json|```/g, "").trim();
+  let cleaned = text.replace(/```json|```/g, "").trim();
   const start = cleaned.indexOf("{");
   const end = cleaned.lastIndexOf("}");
-  if (start === -1 || end === -1 || end < start) {
+  if (start === -1) {
     throw new Error("no JSON braces found");
   }
-  return JSON.parse(cleaned.slice(start, end + 1));
+
+  // 1. 온전한 { ... } 가 존재할 경우 파싱 시도
+  if (end > start) {
+    const rawCandidate = cleaned.slice(start, end + 1);
+    try {
+      return JSON.parse(rawCandidate);
+    } catch {
+      // 쉼표 뒤 닫힘 기호 전 trailing comma 등 불완전한 문법 보정
+      const sanitized = rawCandidate
+        .replace(/,\s*([\}\]])/g, "$1")
+        .replace(/[\u0000-\u001F\u007F-\u009F]/g, " ");
+      try {
+        return JSON.parse(sanitized);
+      } catch (e) {
+        // 복구 실패 시 하단 자동 보정 로직으로 이관
+      }
+    }
+  }
+
+  // 2. 출력 토큰 부족 등으로 중간에 끊긴(Truncated) JSON 복구
+  let jsonStr = cleaned.slice(start);
+  // trailing comma 제거
+  jsonStr = jsonStr.replace(/,\s*$/, "");
+
+  // 열린 따옴표 및 열린 괄호 보정
+  let openQuotes = false;
+  const stack = [];
+  for (let i = 0; i < jsonStr.length; i++) {
+    const char = jsonStr[i];
+    if (char === '"' && jsonStr[i - 1] !== "\\") {
+      openQuotes = !openQuotes;
+    } else if (!openQuotes) {
+      if (char === "{" || char === "[") {
+        stack.push(char === "{" ? "}" : "]");
+      } else if (char === "}" || char === "]") {
+        if (stack.length && stack[stack.length - 1] === char) {
+          stack.pop();
+        }
+      }
+    }
+  }
+
+  if (openQuotes) jsonStr += '"';
+  jsonStr = jsonStr.replace(/,\s*$/, "");
+  while (stack.length > 0) {
+    jsonStr += stack.pop();
+  }
+
+  try {
+    return JSON.parse(jsonStr);
+  } catch (err) {
+    console.error("[extractJSON repair failed]", err.message, text.slice(-200));
+    throw err;
+  }
 }
 
 // JSON이 중간에 잘려도(토큰 한도 등) "reply" 값만이라도 건져서 자연스럽게 보여주기 위한 보조 파서

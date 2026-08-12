@@ -622,9 +622,26 @@ function Review({ scenario, transcript, extraInfo, onRetry, onHome }) {
 
   if (loading) {
     return (
-      <div className="review-loading">
-        <div className="spinner" />
-        <p>코치가 대화를 살펴보고 있어요…</p>
+      <div className="review-loading-container">
+        <div className="review-loading-card">
+          <div className="coach-avatar-wrapper">
+            <div className="coach-pulse-ring"></div>
+            <div className="coach-avatar-icon">🧑‍🏫</div>
+            <div className="coach-sparkle">✨</div>
+          </div>
+
+          <h3 className="review-loading-title">
+            코치가 대화를 살펴보고 있어요<span>.</span><span>.</span><span>.</span>
+          </h3>
+
+          <p className="review-loading-subtitle">
+            선생님의 발화 템포, 교구 활용 및 아이 성향 맞춤 반응을 종합 리포트로 분석 중입니다.
+          </p>
+
+          <div className="loading-progress-bar">
+            <div className="loading-progress-fill"></div>
+          </div>
+        </div>
       </div>
     );
   }
@@ -675,37 +692,12 @@ function Review({ scenario, transcript, extraInfo, onRetry, onHome }) {
       )}
 
       {data.overall && (
-        <div className="review-section overall">
-          <h2>총평</h2>
-          <p>{data.overall}</p>
-        </div>
-      )}
-
-      {/* 대화 발화 분석 (길이 & 점유 비율) */}
-      {data.utteranceStats && (
-        <div className="review-section utterance-stats">
-          <h2>💬 대화 발화 분석 (길이 & 점유 비율)</h2>
-          <p className="section-desc">한 번에 긴 발화를 하면 아이가 부담을 느껴 마음을 닫을 수 있습니다:</p>
-          <div className="stats-comparison-grid">
-            <div className="stat-card teacher">
-              <div className="st-role">선생님 발화</div>
-              <div className="st-ratio">{data.utteranceStats.teacherRatio}%</div>
-              <div className="st-avg">평균 <b>{data.utteranceStats.teacherAvgLen}자</b> / 턴</div>
-            </div>
-            <div className="stat-card child">
-              <div className="st-role">아이 반응</div>
-              <div className="st-ratio">{data.utteranceStats.childRatio}%</div>
-              <div className="st-avg">평균 <b>{data.utteranceStats.childAvgLen}자</b> / 턴</div>
-            </div>
+        <div className="review-section overall-card">
+          <div className="overall-header">
+            <span className="overall-icon">📝</span>
+            <h2>총평</h2>
           </div>
-          <div className="ratio-bar-track">
-            <div className="ratio-bar teacher" style={{ width: `${data.utteranceStats.teacherRatio}%` }}>
-              선생님 {data.utteranceStats.teacherRatio}%
-            </div>
-            <div className="ratio-bar child" style={{ width: `${data.utteranceStats.childRatio}%` }}>
-              아이 {data.utteranceStats.childRatio}%
-            </div>
-          </div>
+          <p className="overall-body">{data.overall}</p>
         </div>
       )}
 
