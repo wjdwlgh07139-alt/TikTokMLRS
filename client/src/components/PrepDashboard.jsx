@@ -547,9 +547,9 @@ export default function PrepDashboard({ childIdParam, onNavigate, onStartRehears
             <div className="check" style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
               {flowPattern.warmup && (
                 <div className="step" style={{ padding: "10px 0" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
-                    <span className="chip" style={{ background: "var(--cyan)", color: "#fff", fontWeight: 800 }}>도입</span>
-                    <span style={{ fontSize: "15px", fontWeight: 800, color: "var(--ink)" }}>{flowPattern.warmup.content}</span>
+                  <div style={{ display: "flex", alignItems: "flex-start", gap: "10px", marginBottom: "4px" }}>
+                    <span className="chip" style={{ background: "var(--cyan)", color: "#fff", fontWeight: 800, flexShrink: 0, whiteSpace: "nowrap", minWidth: "48px", textAlign: "center", padding: "4px 10px", borderRadius: "8px" }}>도입</span>
+                    <span style={{ fontSize: "15px", fontWeight: 800, color: "var(--ink)", flex: 1, lineHeight: 1.5 }}>{flowPattern.warmup.content}</span>
                   </div>
                   {flowPattern.warmup.quote && <p className="say" style={{ marginTop: "6px" }}>&quot;{flowPattern.warmup.quote}&quot;</p>}
                 </div>
@@ -557,9 +557,9 @@ export default function PrepDashboard({ childIdParam, onNavigate, onStartRehears
 
               {flowPattern.leadStyle && (
                 <div className="step" style={{ padding: "10px 0", borderTop: "1px dashed var(--line)" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
-                    <span className="chip" style={{ background: "var(--cyan)", color: "#fff", fontWeight: 800 }}>주도</span>
-                    <span style={{ fontSize: "15px", fontWeight: 800, color: "var(--ink)" }}>{flowPattern.leadStyle.content}</span>
+                  <div style={{ display: "flex", alignItems: "flex-start", gap: "10px", marginBottom: "4px" }}>
+                    <span className="chip" style={{ background: "var(--cyan)", color: "#fff", fontWeight: 800, flexShrink: 0, whiteSpace: "nowrap", minWidth: "48px", textAlign: "center", padding: "4px 10px", borderRadius: "8px" }}>주도</span>
+                    <span style={{ fontSize: "15px", fontWeight: 800, color: "var(--ink)", flex: 1, lineHeight: 1.5 }}>{flowPattern.leadStyle.content}</span>
                   </div>
                   {flowPattern.leadStyle.quote && <p className="say" style={{ marginTop: "6px" }}>&quot;{flowPattern.leadStyle.quote}&quot;</p>}
                 </div>
@@ -567,9 +567,9 @@ export default function PrepDashboard({ childIdParam, onNavigate, onStartRehears
 
               {flowPattern.closing && (
                 <div className="step" style={{ padding: "10px 0", borderTop: "1px dashed var(--line)" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
-                    <span className="chip" style={{ background: "var(--cyan)", color: "#fff", fontWeight: 800 }}>마무리</span>
-                    <span style={{ fontSize: "15px", fontWeight: 800, color: "var(--ink)" }}>{flowPattern.closing.content}</span>
+                  <div style={{ display: "flex", alignItems: "flex-start", gap: "10px", marginBottom: "4px" }}>
+                    <span className="chip" style={{ background: "var(--cyan)", color: "#fff", fontWeight: 800, flexShrink: 0, whiteSpace: "nowrap", minWidth: "48px", textAlign: "center", padding: "4px 10px", borderRadius: "8px" }}>마무리</span>
+                    <span style={{ fontSize: "15px", fontWeight: 800, color: "var(--ink)", flex: 1, lineHeight: 1.5 }}>{flowPattern.closing.content}</span>
                   </div>
                   {flowPattern.closing.quote && <p className="say" style={{ marginTop: "6px" }}>&quot;{flowPattern.closing.quote}&quot;</p>}
                 </div>
