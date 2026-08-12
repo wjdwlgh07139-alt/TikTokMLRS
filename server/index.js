@@ -114,16 +114,26 @@ const CHILDREN_METADATA = [
 ];
 
 function loadExtractedNotes(childId) {
-  const ollamaPath = path.join(__dirname, `../fixtures/extracted_ollama/${childId}.json`);
   const defaultPath = path.join(__dirname, `../fixtures/extracted/${childId}.json`);
-  const targetPath = fs.existsSync(ollamaPath) ? ollamaPath : defaultPath;
-  if (fs.existsSync(targetPath)) {
+  const ollamaPath = path.join(__dirname, `../fixtures/extracted_ollama/${childId}.json`);
+  
+  if (fs.existsSync(defaultPath)) {
     try {
-      return JSON.parse(fs.readFileSync(targetPath, "utf-8"));
+      const data = JSON.parse(fs.readFileSync(defaultPath, "utf-8"));
+      if (Array.isArray(data) && data.length > 0) return data;
+    } catch {
+      // fallback
+    }
+  }
+
+  if (fs.existsSync(ollamaPath)) {
+    try {
+      return JSON.parse(fs.readFileSync(ollamaPath, "utf-8"));
     } catch {
       return [];
     }
   }
+
   return [];
 }
 

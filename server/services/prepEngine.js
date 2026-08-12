@@ -127,6 +127,7 @@ export function buildPrepDashboard(childInfo, extractedNotes = []) {
   sortedNotes.forEach((note) => {
     const prefs = note.preferences || {};
     const allPrefs = [
+      ...(note.activityTags || []).map((tag) => ({ content: tag, quote: `${tag} 활동에 지속적인 흥미를 보임` })),
       ...(prefs.themes || []),
       ...(prefs.sensory || []),
       ...(prefs.etc || []),
@@ -134,14 +135,14 @@ export function buildPrepDashboard(childInfo, extractedNotes = []) {
     ];
 
     allPrefs.forEach((p) => {
-      const content = typeof p === "string" ? p : p.content;
-      const quote = typeof p === "object" ? p.quote : "";
-      if (content) {
+      const content = typeof p === "string" ? p : p?.content;
+      const quote = typeof p === "object" ? p?.quote : "";
+      if (content && typeof content === "string") {
         if (!prefCounts[content]) {
           prefCounts[content] = { count: 0, quote: quote || content, content };
         }
         prefCounts[content].count += 1;
-        if (quote) prefCounts[content].quote = quote;
+        if (quote && quote !== content) prefCounts[content].quote = quote;
       }
     });
   });
@@ -149,14 +150,6 @@ export function buildPrepDashboard(childInfo, extractedNotes = []) {
   const preferenceItems = Object.values(prefCounts)
     .filter((p) => p.count >= 2)
     .sort((a, b) => b.count - a.count);
-
-  if (preferenceItems.length === 0 && totalNotesCount >= 2) {
-    preferenceItems.push(
-      { content: "가게놀이", count: 3, quote: "아이스크림 가게 놀이가 회차마다 길어지고 풍성해졌습니다." },
-      { content: "부드러운 촉감", count: 2, quote: "보들보들하다며 신기해하고 즐거워했습니다." },
-      { content: "파랑색", count: 2, quote: "좋아하는 색깔이 파랑색이라며 적극적으로 참여했습니다." }
-    );
-  }
 
   // Block ④ 진행 참고 (Flow: Warmup, Lead Style, Closing - ONLY shown when note count >= 4)
   let flowPattern = null;
@@ -193,11 +186,7 @@ export function buildPrepDashboard(childInfo, extractedNotes = []) {
     };
   }
 
-  // Completed Rehearsals Reference (내가 이수한 리허설 시나리오 - §6.1 단방향 참조)
-  const completedRehearsals = [
-    { id: "scenario-shy", title: "낯가리는 아이 첫 방문 리허설", date: "2026-06-15", status: "이수 완료" },
-    { id: "scenario-roleplay", title: "역할놀이 주도 반응 상호작용 리허설", date: "2026-07-02", status: "이수 완료" },
-  ];
+  const completedRehearsals = [];
 
   return {
     childId: childInfo.id,

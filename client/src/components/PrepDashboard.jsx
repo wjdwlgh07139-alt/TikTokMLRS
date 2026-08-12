@@ -24,7 +24,7 @@ export default function PrepDashboard({ childIdParam, onNavigate, onStartRehears
   const FALLBACK_CHILDREN = [
     { id: "child-a", childName: "구O윤", ageMonths: 27, gender: "여아", noteCount: 12, lastDate: "2026-10-01" },
     { id: "child-b", childName: "김O준", ageMonths: 30, gender: "남아", noteCount: 5, lastDate: "2026-09-29" },
-    { id: "child-c", childName: "이O아", ageMonths: 24, gender: "여아", noteCount: 2, lastDate: "2026-10-08" },
+    { id: "child-c", childName: "이O서", ageMonths: 30, gender: "여아", noteCount: 2, lastDate: "2026-10-08" },
     { id: "child-d", childName: "박O진", ageMonths: 28, gender: "남아", noteCount: 0, lastDate: null },
   ];
 
@@ -155,8 +155,8 @@ export default function PrepDashboard({ childIdParam, onNavigate, onStartRehears
     } else if (cId === "child-c") {
       return {
         childId: "child-c",
-        childName: "이O아",
-        ageMonths: 24,
+        childName: "이O서",
+        ageMonths: 30,
         gender: "여아",
         totalNotesCount: 2,
         blockMode: "partial",
@@ -224,40 +224,43 @@ export default function PrepDashboard({ childIdParam, onNavigate, onStartRehears
   }
 
 
-  // Helper to generate fallback raw care notes
+  // Helper to generate fallback raw care notes (only if fetch fails completely)
   const getFallbackNotes = (cId) => {
-    return [
-      {
-        noteId: "a-01",
-        date: "2026-07-22",
-        rawNote: "2026년 7월 22일 | 구O윤 · 27개월 (여아)\n[활동 내용]\n플레이콘을 사용해 눌러보고 찢어보고 물로 이어붙이는 촉감 놀이를 진행했습니다. 좋아하는 파란색을 먼저 이야기하며 '보들보들하다'고 신기해하고 즐거워했습니다. 병원놀이 세트로 의사 선생님 역할을 주도하며 콧물 기침 진찰 놀이를 이어갔습니다.\n\n[선생님 의견]\n두 번째 방문이라 지난주보다 훨씬 표정이 풀리고 스스로 놀이를 주도하는 모습이 대견했습니다.",
-        activityTags: ["촉감 놀이", "플레이콘", "역할 놀이", "병원놀이"]
-      },
-      {
-        noteId: "a-02",
-        date: "2026-07-23",
-        rawNote: "2026년 7월 23일 | 구O윤 · 27개월 (여아)\n[활동 내용]\n스케치북에 색연필과 크레파스로 자동차와 손바닥 그리기를 진행했습니다. 다음엔 물감으로 손도장 찍자고 이야기하며 즐겁게 놀이를 마쳤습니다.",
-        activityTags: ["미술 놀이", "그리기", "스케치북"]
-      },
-      {
-        noteId: "a-03",
-        date: "2026-07-28",
-        rawNote: "2026년 7월 28일 | 구O윤 · 27개월 (여아)\n[활동 내용]\n플레이콘과 스티커를 활용해 액자 만들기 활동을 했습니다. 스티커를 붙이는 소근육 활동에 집중력이 매우 높았으며 완성 후 자랑스러워했습니다.",
-        activityTags: ["만들기", "플레이콘", "스티커"]
-      },
-      {
-        noteId: "a-04",
-        date: "2026-08-02",
-        rawNote: "2026년 8월 2일 | 구O윤 · 27개월 (여아)\n[활동 내용]\n클레이 점토를 조물조물 반죽해서 빵 만들기 놀이를 했습니다. 갓 구운 빵이라며 선생님에게 빵 가게 손님 역할을 지정해 주었습니다.",
-        activityTags: ["클레이", "역할 놀이", "빵집 놀이"]
-      },
-      {
-        noteId: "a-05",
-        date: "2026-08-10",
-        rawNote: "2026년 8월 10일 | 구O윤 · 27개월 (여아)\n[활동 내용]\n병원놀이 세트와 블록으로 큰 종합병원을 지었습니다. 칭찬 밴드를 붙여주며 다정한 상호작용이 돋보였습니다.",
-        activityTags: ["병원놀이", "블록 쌓기"]
-      }
-    ];
+    if (cId === "child-a") {
+      return [
+        {
+          noteId: "a-01",
+          date: "2026-07-22",
+          rawNote: "2026년 7월 22일 | 구O윤 · 27개월 (여아)\n[활동 내용]\n플레이콘을 사용해 눌러보고 찢어보고 물로 이어붙이는 촉감 놀이를 진행했습니다. 좋아하는 파란색을 먼저 이야기하며 '보들보들하다'고 신기해하고 즐거워했습니다. 병원놀이 세트로 의사 선생님 역할을 주도하며 콧물 기침 진찰 놀이를 이어갔습니다.\n\n[선생님 의견]\n두 번째 방문이라 지난주보다 훨씬 표정이 풀리고 스스로 놀이를 주도하는 모습이 대견했습니다.",
+          activityTags: ["촉감 놀이", "플레이콘", "역할 놀이", "병원놀이"]
+        },
+        {
+          noteId: "a-02",
+          date: "2026-07-23",
+          rawNote: "2026년 7월 23일 | 구O윤 · 27개월 (여아)\n[활동 내용]\n스케치북에 색연필과 크레파스로 자동차와 손바닥 그리기를 진행했습니다. 다음엔 물감으로 손도장 찍자고 이야기하며 즐겁게 놀이를 마쳤습니다.",
+          activityTags: ["미술 놀이", "그리기", "스케치북"]
+        },
+        {
+          noteId: "a-03",
+          date: "2026-07-28",
+          rawNote: "2026년 7월 28일 | 구O윤 · 27개월 (여아)\n[활동 내용]\n플레이콘과 스티커를 활용해 액자 만들기 활동을 했습니다. 스티커를 붙이는 소근육 활동에 집중력이 매우 높았으며 완성 후 자랑스러워했습니다.",
+          activityTags: ["만들기", "플레이콘", "스티커"]
+        },
+        {
+          noteId: "a-04",
+          date: "2026-08-02",
+          rawNote: "2026년 8월 2일 | 구O윤 · 27개월 (여아)\n[활동 내용]\n클레이 점토를 조물조물 반죽해서 빵 만들기 놀이를 했습니다. 갓 구운 빵이라며 선생님에게 빵 가게 손님 역할을 지정해 주었습니다.",
+          activityTags: ["클레이", "역할 놀이", "빵집 놀이"]
+        },
+        {
+          noteId: "a-05",
+          date: "2026-08-10",
+          rawNote: "2026년 8월 10일 | 구O윤 · 27개월 (여아)\n[활동 내용]\n병원놀이 세트와 블록으로 큰 종합병원을 지었습니다. 칭찬 밴드를 붙여주며 다정한 상호작용이 돋보였습니다.",
+          activityTags: ["병원놀이", "블록 쌓기"]
+        }
+      ];
+    }
+    return [];
   };
 
   // Load raw notes for modal
@@ -271,8 +274,8 @@ export default function PrepDashboard({ childIdParam, onNavigate, onStartRehears
         return res.json();
       })
       .then((data) => {
-        const list = Array.isArray(data) ? data : (data && Array.isArray(data.notes) ? data.notes : []);
-        if (list.length > 0) {
+        const list = Array.isArray(data) ? data : (data && Array.isArray(data.notes) ? data.notes : null);
+        if (list !== null) {
           setRawNotes(list);
         } else {
           setRawNotes(getFallbackNotes(selectedChildId));
@@ -582,30 +585,7 @@ export default function PrepDashboard({ childIdParam, onNavigate, onStartRehears
           </div>
         )}
 
-        {/* Bottom Block: 내가 이수한 리허설 시나리오 (§6.1 단방향 참조) */}
-        {completedRehearsals && completedRehearsals.length > 0 && (
-          <div className="sec" style={{ background: "#F8FAFC", border: "1px solid var(--line)" }}>
-            <div className="sec-h">
-              <span className="sec-n">🎓</span>
-              <span className="sec-t">내가 이수한 리허설 시나리오</span>
-            </div>
-            <p className="sec-d">째깍 리허설 도구에서 이수한 모의 훈련 이력입니다.</p>
 
-            <div className="check">
-              {completedRehearsals.map((reh, idx) => (
-                <div key={idx} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 0", borderBottom: idx < completedRehearsals.length - 1 ? "1px dashed var(--line)" : "none" }}>
-                  <div>
-                    <span style={{ fontSize: "15px", fontWeight: 800, color: "var(--ink)" }}>{reh.title}</span>
-                    <p style={{ fontSize: "12px", color: "var(--ink-3)", margin: "2px 0 0" }}>이수일: {reh.date}</p>
-                  </div>
-                  <span className="chip" style={{ background: "var(--cyan-soft)", color: "var(--cyan-deep)", fontWeight: 800 }}>
-                    {reh.status}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
 
         {/* Bottom padding spacer to prevent BottomTabBar overlap */}
         <div style={{ height: "100px" }}></div>
@@ -624,7 +604,13 @@ export default function PrepDashboard({ childIdParam, onNavigate, onStartRehears
 
             <div className="modal-body">
               {loadingNotes ? (
-                <p>노트 원문을 불러오는 중...</p>
+                <p style={{ textAlign: "center", color: "var(--ink-3)", padding: "20px 0" }}>노트 원문을 불러오는 중...</p>
+              ) : rawNotes.length === 0 ? (
+                <div style={{ textAlign: "center", padding: "40px 20px", color: "var(--ink-3)" }}>
+                  <p style={{ fontSize: "32px", marginBottom: "8px" }}>📝</p>
+                  <p style={{ fontSize: "15px", fontWeight: 700, color: "var(--ink-2)" }}>작성된 돌봄 노트 원문이 없습니다.</p>
+                  <p style={{ fontSize: "13px", marginTop: "4px" }}>첫 대면 수업 후 작성된 돌봄 노트가 이곳에 기록됩니다.</p>
+                </div>
               ) : (
                 rawNotes.map((note) => (
                   <div key={note.noteId} className="raw-note-card">
