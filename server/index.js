@@ -448,6 +448,69 @@ app.post("/api/roleplay", async (req, res) => {
   }
 });
 
+function salvageJSON(text) {
+  if (!text || typeof text !== "string") throw new Error("empty text");
+  let s = text.replace(/```json|```/g, "").trim();
+  const start = s.indexOf("{");
+  if (start === -1) throw new Error("no opening brace");
+  s = s.slice(start);
+
+  // 1) 미완결 따옴표 문자열 잘라내기
+  const quotes = (s.match(/(?<!\\)"/g) || []).length;
+  if (quotes % 2 === 1) {
+    s = s.slice(0, s.lastIndexOf('"'));
+  }
+
+  // 2) 마지막 완결 요소까지 되감기 (미완결 키나 쉼표 제거)
+  s = s.replace(/,\s*[^,\[\]{}]*$/, "");
+
+  // 3) 열린 괄호 스택으로 닫기
+  const stack = [];
+  let openQ = false;
+  for (let i = 0; i < s.length; i++) {
+    const c = s[i];
+    if (c === '"' && s[i - 1] !== "\\") {
+      openQ = !openQ;
+    } else if (!openQ) {
+      if (c === "{" || c === "[") stack.push(c === "{" ? "}" : "]");
+      else if (c === "}" || c === "]") {
+        if (stack.length && stack[stack.length - 1] === c) stack.pop();
+      }
+    }
+  }
+
+  while (stack.length > 0) {
+    s += stack.pop();
+  }
+
+  const parsed = JSON.parse(s);
+  parsed.partial = true;
+  return parsed;
+}
+
+function isMeaninglessSession(transcript) {
+  const teacherLines = transcript
+    .split("\n")
+    .filter((l) => l.includes("선생님:"))
+    .map((l) => l.replace(/\[.*?\]\s*선생님:\s*/, "").trim());
+
+  if (teacherLines.length === 0) return true;
+
+  let totalChars = 0;
+  let meaninglessCount = 0;
+  const hangulJamoRegex = /^[\u3131-\u318E\s\.\?!]+$/; // 초성만 있는 경우 (ㅇㅎ, ㅇㅋ, ㅂㅇ)
+
+  for (const text of teacherLines) {
+    totalChars += text.length;
+    if (text.length < 2 || hangulJamoRegex.test(text)) {
+      meaninglessCount++;
+    }
+  }
+
+  const avgLen = totalChars / teacherLines.length;
+  return avgLen < 2 || meaninglessCount >= Math.ceil(teacherLines.length / 2);
+}
+
 app.post("/api/review", async (req, res) => {
   try {
     const { title, transcript, sessionId, traitId: reqTraitId } = req.body || {};
@@ -470,8 +533,38 @@ app.post("/api/review", async (req, res) => {
     const targetTurns = persona?.turns || 3;
     const isEarlyTermination = turnMatches > 0 && turnMatches < targetTurns;
 
-    // 발화 길이에 관한 통계 계산 (선생님 vs 아이)
     const lines = transcript.split("\n");
+
+    // 1. 의미 없는 무성의 대화 사전 검사 (LLM 호출 차단 & 규칙 기반 리포트 반환)
+    if (isMeaninglessSession(transcript)) {
+      console.log("[Review Pre-filter] Meaningless/single-character session detected. Returning rule-based report.");
+      const defaultRubricNames = ["관계·신뢰", "소통·전달", "정서 돌봄", "안전·약속 이행", "상황 대처"];
+      return res.json({
+        overall: "의미 있는 대화 내용이 부족하여 역량 평가를 생성할 수 없습니다. 초성이나 단답 대신 성의 있는 대화로 다시 연습해 주세요.",
+        strengths: [],
+        improve: [
+          {
+            quote: lines.find((l) => l.includes("선생님:"))?.replace(/\[.*?\]\s*선생님:\s*/, "") || "",
+            suggestion: "아이와의 대화 시 단발성 답변보다는 아이의 반응을 살피고 감정을 읽어주는 완결된 문장으로 응답해 주세요.",
+            better: "우리 째깍이 반가워! 오늘 선생님이랑 재미있는 놀이 해볼까?"
+          }
+        ],
+        rubric: defaultRubricNames.map((name) => ({ name, status: "no_opportunity", score: null })),
+        traitScores: [],
+        triggeredFails: [],
+        keep: "아이와의 만남에서는 성의 있고 정성 어린 표현이 관계 형성의 첫걸음입니다.",
+        targetTurns,
+        actualTurns: turnMatches || targetTurns,
+        isEarlyTermination,
+        feedbackType: persona?.feedbackType || "signal",
+        checklists: persona?.checklists || [],
+        levelHistory: sessionObj?.levelHistory || [],
+        actualTrait: trait ? { id: trait.id, label: trait.label, summary: trait.summary } : null,
+        isMeaningless: true,
+      });
+    }
+
+    // 발화 길이에 관한 통계 계산 (선생님 vs 아이)
     let teacherTotal = 0, teacherCount = 0;
     let childTotal = 0, childCount = 0;
 
@@ -502,26 +595,128 @@ app.post("/api/review", async (req, res) => {
       persona,
     });
 
-    const response = await ai.models.generateContent({
-      model: MODEL_REVIEW,
-      contents: [
-        { role: "user", parts: [{ text: "위 대화를 바탕으로 피드백을 작성해주세요." }] },
-      ],
-      config: {
-        systemInstruction: system,
-        maxOutputTokens: 4096,
-        responseMimeType: "application/json",
-        thinkingConfig: { thinkingLevel: "high" },
-      },
-    });
+    let result = null;
+    let lastRawText = "";
 
-    const text = response.text ?? "";
-    let result;
-    try {
-      result = extractJSON(text);
-    } catch (err) {
-      console.error("[review parse error]", err, text);
-      return res.status(500).json({ error: "review parsing failed" });
+    // [단계별 재시도 정책]
+    // 1차: 일반 생성 시도
+    // 2차: MAX_TOKENS 또는 파싱 실패 시 'evidence 30자 제한 + improve 1개 축소' 재요청 후 salvage
+    // 3차: 실패 시 규칙 기반 최소 리포트 반환
+
+    for (let attempt = 1; attempt <= 2; attempt++) {
+      try {
+        const promptSuffix = attempt === 1
+          ? "위 대화를 바탕으로 피드백을 작성해주세요. 반드시 완결된 정교한 JSON 포맷으로만 응답해주세요."
+          : "[축소 재요청] 이전 생성 시 토큰 한도 초과(MAX_TOKENS)가 발생했습니다. 모든 evidence는 30자 이내로 극단적으로 축소하고, improve 항목은 최대 1개만 반환하세요.";
+
+        const response = await ai.models.generateContent({
+          model: MODEL_REVIEW,
+          contents: [
+            { role: "user", parts: [{ text: promptSuffix }] },
+          ],
+          config: {
+            systemInstruction: system,
+            maxOutputTokens: attempt === 1 ? 4096 : 2048,
+            responseMimeType: "application/json",
+          },
+        });
+
+        const candidate = response.candidates?.[0];
+        const finishReason = candidate?.finishReason;
+        lastRawText = response.text ?? candidate?.content?.parts?.[0]?.text ?? "";
+
+        // 1) 정상 파싱 시도
+        try {
+          result = extractJSON(lastRawText);
+          if (result && typeof result === "object") {
+            if (attempt > 1) console.log(`[Review Retry Success] Attempt ${attempt} succeeded`);
+            break;
+          }
+        } catch {
+          // extractJSON 실패 시
+        }
+
+        // 2) MAX_TOKENS 또는 파싱 실패 시 salvage 파싱 시도
+        if (finishReason === "MAX_TOKENS" || !result) {
+          console.warn(`[Review Warning] Attempt ${attempt} failed (finishReason: ${finishReason}). Trying salvage...`);
+          try {
+            result = salvageJSON(lastRawText);
+            if (result && typeof result === "object") {
+              console.log(`[Review Salvage Success] Successfully salvaged partial JSON on attempt ${attempt}`);
+              break;
+            }
+          } catch (salvageErr) {
+            console.error(`[Review Salvage Failed] Attempt ${attempt}:`, salvageErr.message);
+          }
+        }
+      } catch (attemptErr) {
+        console.error(`[Review AI Attempt ${attempt} Error]`, attemptErr.message);
+      }
+    }
+
+    // 3차: 1~2차 및 Salvage 모두 실패 시 규칙 기반 최소 리포트 (트리거 지점 중심)
+    if (!result) {
+      console.warn("[Review Fallback] All retries and salvages failed. Generating rule-based minimal report.");
+      result = {
+        overall: "대화 평가를 생성하는 도중 네트워크/토큰 한도로 인해 최소 리포트가 생성되었습니다.",
+        strengths: [],
+        improve: [
+          {
+            quote: lines.find((l) => l.includes("선생님:"))?.replace(/\[.*?\]\s*선생님:\s*/, "") || "",
+            suggestion: "아이의 반응을 주의 깊게 살피고 긍정적인 공감 표현을 늘려주세요.",
+            better: "우리 째깍이 반가워! 오늘 선생님이랑 재미있게 놀아볼까?"
+          }
+        ],
+        rubric: [],
+        traitScores: [],
+        triggeredFails: [],
+        keep: "아이와의 대화에서는 경청과 긍정적인 공감이 가장 중요합니다.",
+        isFallbackReport: true,
+      };
+    }
+
+    // 2. 서버 사이드 기본 루브릭 보정 (no_opportunity 자동 채움)
+    const DEFAULT_RUBRIC_NAMES = ["관계·신뢰", "소통·전달", "정서 돌봄", "안전·약속 이행", "상황 대처"];
+    const returnedRubricMap = new Map((result.rubric || []).map((r) => [r.name, r]));
+    const fullRubric = DEFAULT_RUBRIC_NAMES.map((name) => {
+      if (returnedRubricMap.has(name)) {
+        return returnedRubricMap.get(name);
+      }
+      return { name, status: "no_opportunity", score: null };
+    });
+    result.rubric = fullRubric;
+
+    // 3. 서버 사이드 성향/시나리오 루브릭 조인 (question, max 결합 & no_opportunity 자동 채움)
+    const scenarioRubrics = persona?.rubricItems || [];
+    const traitRubrics = trait?.rubricItems || [];
+    const combinedRubricDefs = [...scenarioRubrics, ...traitRubrics];
+
+    if (combinedRubricDefs.length > 0) {
+      const returnedTraitScoresMap = new Map((result.traitScores || []).map((ts) => [ts.id, ts]));
+      const fullTraitScores = combinedRubricDefs.map((def) => {
+        const item = returnedTraitScoresMap.get(def.id);
+        if (item && item.status && item.status !== "no_opportunity") {
+          return {
+            id: def.id,
+            question: def.question,
+            max: def.weight,
+            status: item.status,
+            score: item.score,
+            evidence: item.evidence || "",
+          };
+        }
+        return {
+          id: def.id,
+          question: def.question,
+          max: def.weight,
+          status: "no_opportunity",
+          score: null,
+          evidence: null,
+        };
+      });
+      result.traitScores = fullTraitScores;
+    } else {
+      result.traitScores = result.traitScores || [];
     }
 
     result.targetTurns = targetTurns;
