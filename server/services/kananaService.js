@@ -3,13 +3,14 @@ import path from "path";
 
 const OLLAMA_MODEL = process.env.KANANA_MODEL || "hf.co/dummy9996/kanana-2-1.3b-instruct-GGUF:latest";
 const OLLAMA_URL = process.env.OLLAMA_URL || "http://localhost:11434/api/generate";
+const OLLAMA_TAGS_URL = process.env.OLLAMA_TAGS_URL || OLLAMA_URL.replace(/\/api\/generate\/?$/, "/api/tags");
 
 /**
  * Checks if local Ollama Kanana server is running
  */
 export async function checkKananaStatus() {
   try {
-    const res = await fetch("http://localhost:11434/api/tags");
+    const res = await fetch(OLLAMA_TAGS_URL);
     if (!res.ok) return { online: false, model: OLLAMA_MODEL, error: "Ollama not responding" };
     const data = await res.json();
     const hasModel = data.models?.some((m) => m.name && (m.name.includes("kanana") || m.name.includes("1.3b")));

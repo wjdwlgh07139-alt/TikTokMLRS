@@ -154,34 +154,131 @@ export function buildPrepDashboard(childInfo, extractedNotes = []) {
   // Block ④ 진행 참고 (Flow: Warmup, Lead Style, Closing - ONLY shown when note count >= 4)
   let flowPattern = null;
   if (totalNotesCount >= 4) {
-    flowPattern = {
-      warmup: {
-        title: "도입",
-        content: "재료를 바로 쓰지 않고 만지고 쏟아보는 탐색 시간을 먼저 줌",
-        quote: "플레이콘 조각을 만져보고 쏟아서 잠시 탐색해본 후 물티슈로 이어붙였습니다.",
-      },
-      leadStyle: {
-        title: "주도",
-        content: "아이가 배역을 정해주는 편 — 정해주는 배정에 따라가면 유연하게 풀림",
-        quote: "저에게 의사선생님 역할을 맡겨주더니 자발적으로 대화를 이어갔습니다.",
-      },
-      closing: {
-        title: "마무리",
-        content: "책 읽기 · 그림 그려보기 · 스티커 붙이기 등 정적 활동으로 정리",
-        quote: "스케치북에 그림을 그리고 스티커를 붙인 후 정돈하고 마무리했습니다.",
-      },
-    };
+    let warmup = null;
+    let leadStyle = null;
+    let closing = null;
+
+    // 1. Try to get explicit flow items from notes (search newest to oldest)
+    for (let i = sortedNotes.length - 1; i >= 0; i--) {
+      const f = sortedNotes[i].flow;
+      if (f && typeof f === "object") {
+        if (!warmup && f.warmup?.content) {
+          warmup = { title: "도입", content: f.warmup.content, quote: f.warmup.quote || "" };
+        }
+        if (!leadStyle && f.leadStyle?.content) {
+          leadStyle = { title: "주도", content: f.leadStyle.content, quote: f.leadStyle.quote || "" };
+        }
+        if (!closing && f.closing?.content) {
+          closing = { title: "마무리", content: f.closing.content, quote: f.closing.quote || "" };
+        }
+      }
+    }
+
+    // 2. Dynamic Fallback Synthesis if flow items are missing in extracted notes
+    const allPositives = sortedNotes.flatMap((n) => n.positiveSignals || []);
+    const allNegatives = sortedNotes.flatMap((n) => n.negativeSignals || []);
+    const allMaterials = sortedNotes.flatMap((n) => n.materials || []);
+    const uniqueMaterials = [...new Set(allMaterials)];
+    const topMaterial = uniqueMaterials[0] || "교구";
+
+    if (!warmup) {
+      const shySignal = allNegatives.find(
+        (s) => s.content?.includes("낯가림") || s.content?.includes("불안") || s.quote?.includes("낯설어")
+      );
+      if (shySignal) {
+        warmup = {
+          title: "도입",
+          content: `초반 적응 시간이 필요하므로 선호하는 ${topMaterial} 교구를 먼저 제시하며 탐색 유도`,
+          quote: shySignal.quote || shySignal.content,
+        };
+      } else {
+        const firstPos = allPositives.find(
+          (s) => s.content?.includes("탐색") || s.content?.includes("흥미") || s.quote?.includes("탐색")
+        );
+        warmup = {
+          title: "도입",
+          content: `${topMaterial} 등 재료를 바로 쓰지 않고 만지고 탐색하는 시간을 먼저 부여`,
+          quote: firstPos ? firstPos.quote || firstPos.content : `${topMaterial} 활동 탐색 시간을 먼저 가짐`,
+        };
+      }
+    }
+
+    if (!leadStyle) {
+      const roleSignal = allPositives.find(
+        (s) =>
+          s.content?.includes("역할") ||
+          s.content?.includes("주도") ||
+          s.quote?.includes("의사") ||
+          s.quote?.includes("가게") ||
+          s.quote?.includes("역할")
+      );
+      if (roleSignal) {
+        leadStyle = {
+          title: "주도",
+          content: "아이가 배역 및 주도권을 정해주는 스타일 — 제시하는 의도에 따라가면 자연스럽게 확장",
+          quote: roleSignal.quote || roleSignal.content,
+        };
+      } else {
+        const activePos = allPositives[0];
+        leadStyle = {
+          title: "주도",
+          content: "아동의 반응과 표현에 맞추어 보조하며 정서적 공감대를 형성하는 스타일",
+          quote: activePos ? activePos.quote || activePos.content : "자발적 참여 속도에 유연하게 맞추어 진행",
+        };
+      }
+    }
+
+    if (!closing) {
+      const closingPos = sortedNotes
+        .flatMap((n) => n.positiveSignals || [])
+        .reverse()
+        .find(
+          (s) =>
+            s.content?.includes("정리") ||
+            s.content?.includes("약속") ||
+            s.quote?.includes("마무리") ||
+            s.quote?.includes("스케치북") ||
+            s.quote?.includes("책")
+        );
+
+      if (closingPos) {
+        closing = {
+          title: "마무리",
+          content: "책 읽기 · 그림 그리기 또는 정리정돈 등 정적 활동으로 마무리",
+          quote: closingPos.quote || closingPos.content,
+        };
+      } else {
+        closing = {
+          title: "마무리",
+          content: "수업 종료 전 미리 약속을 나누거나 스스로 정리정돈을 마칠 수 있도록 지도",
+          quote: `${childInfo.childName || "아동"}와 함께 활동 교구를 정리하며 수업 마무리`,
+        };
+      }
+    }
+
+    flowPattern = { warmup, leadStyle, closing };
   }
 
   // Block ⑤ 변화 추이 (Trajectory Trend for 8+ notes)
   let trajectoryTrend = null;
   if (totalNotesCount >= 8) {
+    const earlyNotes = sortedNotes.slice(0, Math.ceil(totalNotesCount / 3));
+    const recentNotes = sortedNotes.slice(-Math.ceil(totalNotesCount / 3));
+
+    const earlyMatList = [...new Set(earlyNotes.flatMap((n) => n.materials || []))].slice(0, 3);
+    const recentMatList = [...new Set(recentNotes.flatMap((n) => n.materials || []))].slice(0, 3);
+
+    const earlyPosCount = earlyNotes.flatMap((n) => n.positiveSignals || []).length;
+    const recentPosCount = recentNotes.flatMap((n) => n.positiveSignals || []).length;
+
     trajectoryTrend = {
-      summary: `${childInfo.childName || "아동"}의 12회차 반응 변화 추이`,
+      summary: `${childInfo.childName || "아동"}의 ${totalNotesCount}회차 반응 변화 추이`,
       points: [
-        "가게놀이(병원놀이 → 아이스크림 가게 → 빵집) 범주 확장 및 주도성이 지속적으로 성장하고 있습니다.",
-        "초기 탐색 위주에서 자발적 배역 지정 및 상호 대화 중심 놀이로 자연스럽게 발전했습니다.",
-        "정리 정돈 및 마무리 활동 시 스스로 통에 담거나 스티커로 정돈하는 자율성을 보입니다.",
+        `초기 (${earlyMatList.join(", ") || "기본 놀이"}) 탐색 위주에서 최근 (${recentMatList.join(", ") || "다양한 교구"}) 활동으로 놀이 영역이 확장되고 있습니다.`,
+        recentPosCount >= earlyPosCount
+          ? `회차가 지날수록 긍정적 상호작용과 자발적 참여 반응이 지속적으로 높아지고 있습니다.`
+          : `선생님과의 라포 형성을 통해 자발적 의사표현 및 놀이 몰입도가 안정화되었습니다.`,
+        `수업 마무리에 스스로 교구를 정리하거나 정적 활동으로 자연스럽게 정돈하는 자율성을 보입니다.`,
       ],
     };
   }
