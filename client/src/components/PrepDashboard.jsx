@@ -9,9 +9,11 @@ export default function PrepDashboard({ childIdParam, onNavigate, onStartRehears
   const [showNotesModal, setShowNotesModal] = useState(false);
   const [rawNotes, setRawNotes] = useState([]);
   const [loadingNotes, setLoadingNotes] = useState(false);
+  const [showAllMaterials, setShowAllMaterials] = useState(false);
 
   // Synchronize route parameter
   useEffect(() => {
+    setShowAllMaterials(false);
     if (childIdParam) {
       setSelectedChildId(childIdParam);
     } else {
@@ -437,44 +439,55 @@ export default function PrepDashboard({ childIdParam, onNavigate, onStartRehears
           </div>
         )}
 
-        {/* Block ①: 가져갈 것 (Materials Checklist & Exhaustion Warning) */}
-        {materialsChecklist && materialsChecklist.length > 0 && (
-          <div className="sec">
-            <div className="sec-h">
-              <span className="sec-n">{secNum++}</span>
-              <span className="sec-t">가져갈 것</span>
-              <span className="cnt">{materialsChecklist.length}</span>
-            </div>
+        {/* Block ①: 가져갈 것 (Materials Reference List & Exhaustion Warning) */}
+        {materialsChecklist && materialsChecklist.length > 0 && (() => {
+          const visibleMaterials = showAllMaterials ? materialsChecklist : materialsChecklist.slice(0, 3);
+          const hasMore = materialsChecklist.length > 3;
 
-            <div className="check">
-              <p className="check-t">아이가 좋아하는 놀이 준비물</p>
-              <p className="check-s">최근 3회 사용 빈도 및 최근성을 분석한 준비물 추천 항목입니다.</p>
+          return (
+            <div className="sec">
+              <div className="sec-h">
+                <span className="sec-n">{secNum++}</span>
+                <span className="sec-t">가져갈 것</span>
+                <span className="cnt">{materialsChecklist.length}</span>
+              </div>
 
-              {materialsChecklist.map((item, idx) => {
-                const isChecked = checkedMaterials[item.name] || false;
-                return (
-                  <label
-                    key={idx}
-                    className="ck"
-                    onClick={() => toggleMaterialCheck(item.name)}
+              <div className="check">
+                <p className="check-t">아이가 좋아하는 놀이 준비물</p>
+                <p className="check-s">최근 3회 사용 빈도 및 최근성을 분석한 준비물 추천 항목입니다.</p>
+
+                <div style={{ marginTop: "14px" }}>
+                  {visibleMaterials.map((item, idx) => (
+                    <div key={idx} className="mat-ref-item">
+                      <span className="mat-ref-bullet">•</span>
+                      <div className="mat-ref-content">
+                        <span className="mat-ref-name">{item.name}</span>
+                        {item.exhausted && (
+                          <span className="mat-ref-warning">
+                            ⚠️ 3회 연속 사용됨 — 심화 놀이로 발전시키거나 교체를 고려하세요.
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {hasMore && (
+                  <button
+                    className="btn-expand-materials"
+                    onClick={() => setShowAllMaterials(!showAllMaterials)}
                   >
-                    <input
-                      type="checkbox"
-                      checked={isChecked}
-                      onChange={() => {}}
-                    />
-                    <span>
-                      <em>{item.name}</em>
-                      {item.exhausted && (
-                        <i>⚠️ 3회 연속 사용됨 — 심화 놀이로 발전시키거나 교체를 고려하세요.</i>
-                      )}
-                    </span>
-                  </label>
-                );
-              })}
+                    {showAllMaterials ? (
+                      <>접기 ▴</>
+                    ) : (
+                      <>+ {materialsChecklist.length - 3}개 항목 더보기 ▾</>
+                    )}
+                  </button>
+                )}
+              </div>
             </div>
-          </div>
-        )}
+          );
+        })()}
 
         {/* Block ②: 지난 수업 약속 이어가기 (Continuity Items) */}
         {continuityItems && continuityItems.length > 0 && (

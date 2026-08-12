@@ -6,8 +6,8 @@ import express from "express";
 import { GoogleGenAI } from "@google/genai";
 import { PERSONAS, baseSystem, reviewSystem } from "./personas.js";
 import { composeSystemPrompt, composeReviewPrompt } from "./services/promptComposer.js";
+import { checkKananaStatus, extractNoteWithKanana, isExtractionInsufficient, reextractChildNotesWithKanana } from "./services/kananaService.js";
 import { buildPrepDashboard } from "./services/prepEngine.js";
-import { checkKananaStatus, extractNoteWithKanana } from "./services/kananaService.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -113,28 +113,52 @@ const CHILDREN_METADATA = [
   { id: "child-d", childName: "박O진", name: "박O진", ageMonths: 28, gender: "남아", noteCount: 0, totalNotesCount: 0, lastDate: null, teacherNote: "사자 선생님 담당" },
 ];
 
-function loadExtractedNotes(childId) {
-  const defaultPath = path.join(__dirname, `../fixtures/extracted/${childId}.json`);
+async function loadExtractedNotes(childId) {
   const ollamaPath = path.join(__dirname, `../fixtures/extracted_ollama/${childId}.json`);
-  
-  if (fs.existsSync(defaultPath)) {
+  const defaultPath = path.join(__dirname, `../fixtures/extracted/${childId}.json`);
+  const notesDir = path.join(__dirname, `../fixtures/notes/${childId}`);
+
+  // Count raw notes
+  let rawCount = 0;
+  if (fs.existsSync(notesDir)) {
+    rawCount = fs.readdirSync(notesDir).filter((f) => f.endsWith(".json")).length;
+  }
+
+  // 1. extracted_ollama가 우선적으로 보이도록 설정
+  let ollamaNotes = [];
+  if (fs.existsSync(ollamaPath)) {
     try {
-      const data = JSON.parse(fs.readFileSync(defaultPath, "utf-8"));
-      if (Array.isArray(data) && data.length > 0) return data;
+      ollamaNotes = JSON.parse(fs.readFileSync(ollamaPath, "utf-8"));
     } catch {
-      // fallback
+      ollamaNotes = [];
     }
   }
 
-  if (fs.existsSync(ollamaPath)) {
+  // 2. 내용이 부실하다 판단되면 (속성 누락/노트 수 부족 등) Kanana 모델로 재요약/재추출 수행
+  if (isExtractionInsufficient(ollamaNotes, rawCount)) {
+    console.log(`[Kanana Auto Trigger] child '${childId}' extraction is sparse/insufficient. Triggering Kanana re-summarization...`);
     try {
-      return JSON.parse(fs.readFileSync(ollamaPath, "utf-8"));
+      const freshNotes = await reextractChildNotesWithKanana(childId, __dirname);
+      if (Array.isArray(freshNotes) && freshNotes.length > 0) {
+        return freshNotes;
+      }
+    } catch (err) {
+      console.warn(`[Kanana Auto Trigger Error] Re-summarization failed for ${childId}:`, err.message);
+    }
+  } else {
+    return ollamaNotes;
+  }
+
+  // Ollama 미실행 또는 실패 시 default extracted 파일 폴백
+  if (fs.existsSync(defaultPath)) {
+    try {
+      return JSON.parse(fs.readFileSync(defaultPath, "utf-8"));
     } catch {
       return [];
     }
   }
 
-  return [];
+  return ollamaNotes;
 }
 
 app.get("/api/prep/children", (req, res) => {
@@ -159,16 +183,31 @@ app.post("/api/prep/kanana/extract", async (req, res) => {
   }
 });
 
-app.get("/api/prep/children/:childId", (req, res) => {
+app.get("/api/prep/children/:childId", async (req, res) => {
   const { childId } = req.params;
   const childInfo = CHILDREN_METADATA.find((c) => c.id === childId);
   if (!childInfo) {
     return res.status(404).json({ error: "child not found" });
   }
 
-  const extractedNotes = loadExtractedNotes(childId);
-  const dashboard = buildPrepDashboard(childInfo, extractedNotes);
-  res.json(dashboard);
+  try {
+    const extractedNotes = await loadExtractedNotes(childId);
+    const dashboard = buildPrepDashboard(childInfo, extractedNotes);
+    res.json(dashboard);
+  } catch (err) {
+    console.error(`[prep dashboard error for ${childId}]`, err);
+    res.status(500).json({ error: "failed to build prep dashboard", details: err.message });
+  }
+});
+
+app.post("/api/prep/children/:childId/reextract", async (req, res) => {
+  const { childId } = req.params;
+  try {
+    const freshNotes = await reextractChildNotesWithKanana(childId, __dirname);
+    res.json({ success: true, count: freshNotes.length, notes: freshNotes });
+  } catch (err) {
+    res.status(500).json({ error: "Re-extraction failed", details: err.message });
+  }
 });
 
 app.get("/api/prep/children/:childId/notes", (req, res) => {
@@ -190,23 +229,28 @@ app.get("/api/prep/children/:childId/notes", (req, res) => {
   }
 });
 
-app.get("/api/prep/recommendations", (req, res) => {
+app.get("/api/prep/recommendations", async (req, res) => {
   const allRecs = [];
-  CHILDREN_METADATA.forEach((child) => {
-    const extractedNotes = loadExtractedNotes(child.id);
-    const dash = buildPrepDashboard(child, extractedNotes);
-    if (dash.recommendations && dash.recommendations.length > 0) {
-      dash.recommendations.forEach((rec) => {
-        allRecs.push({
-          ...rec,
-          childId: child.id,
-          childName: child.childName,
-          childAgeMonths: child.ageMonths,
+  try {
+    for (const child of CHILDREN_METADATA) {
+      const extractedNotes = await loadExtractedNotes(child.id);
+      const dash = buildPrepDashboard(child, extractedNotes);
+      if (dash.recommendations && dash.recommendations.length > 0) {
+        dash.recommendations.forEach((rec) => {
+          allRecs.push({
+            ...rec,
+            childId: child.id,
+            childName: child.childName,
+            childAgeMonths: child.ageMonths,
+          });
         });
-      });
+      }
     }
-  });
-  res.json(allRecs);
+    res.json(allRecs);
+  } catch (err) {
+    console.error("[prep recommendations error]", err);
+    res.status(500).json({ error: "failed to load recommendations", details: err.message });
+  }
 });
 
 app.post("/api/rehearsal/session", (req, res) => {

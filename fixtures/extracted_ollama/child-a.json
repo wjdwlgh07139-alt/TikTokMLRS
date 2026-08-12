@@ -1,106 +1,348 @@
 [
   {
-    "positiveSignals": [
-      "놀이에 대한 흥미",
-      "새로운 장난감 탐색",
-      "의사표현 능력"
+    "noteId": "a-01",
+    "date": "2026-07-22",
+    "ageMonths": 27,
+    "activityTags": [
+      "미술 놀이",
+      "만들기",
+      "역할 놀이",
+      "촉감 놀이"
     ],
-    "negativeSignals": []
-  },
-  {
+    "materials": [
+      "놀이",
+      "역할"
+    ],
     "positiveSignals": [
       {
-        "content": "탐색",
-        "traitId": "clinging"
+        "content": "선호 미술 놀이",
+        "quote": "원문 문장"
+      }
+    ],
+    "negativeSignals": [
+      {
+        "content": "초반 낯가림 관찰됨",
+        "quote": "초반엔 그래도 조금 낯설어하는 모습을 보였지만"
+      }
+    ],
+    "preferences": {
+      "themes": [
+        {
+          "content": "선호 미술 놀이",
+          "quote": "원문 문장"
+        }
+      ]
+    },
+    "flow": {
+      "content": "건강 관리",
+      "quote": "진찰 후 상태 확인"
+    },
+    "continuity": {
+      "unfinished": {
+        "content": "플레이콘 놀이를 엄마와도 함께 진행하고 싶어함",
+        "quote": "다시 플레이콘으로 놀이하고 싶은데 엄마와도 하고 싶었다며"
+      }
+    },
+    "traitHints": [
+      {
+        "traitId": "shy",
+        "strength": "weak",
+        "quote": "초반엔 그래도 조금 낯설어하는 모습을 보였지만"
+      }
+    ]
+  },
+  {
+    "noteId": "a-02",
+    "date": "2026-07-23",
+    "ageMonths": 27,
+    "activityTags": [
+      "만들기",
+      "책 읽기",
+      "역할 놀이"
+    ],
+    "materials": [
+      "플레이콘",
+      "물티슈",
+      "그림책",
+      "스케치북",
+      "스티커"
+    ],
+    "positiveSignals": [
+      {
+        "content": "선생님 무릎에 앉아 정서적 신뢰 형성",
+        "quote": "선생님 무픔에 앉아 책을 읽기도 했어요^^"
+      },
+      {
+        "content": "가게 역할놀이 몰입도 증가",
+        "quote": "얼마에요? 묻는 선생님의 말에 \"삼천원이요~\"라고 말하는 OO이였답니다"
       }
     ],
     "negativeSignals": [],
-    "traitHints": [
-      {
-        "traitId": "why",
-        "strength": "weak"
-      }
-    ]
+    "unfinished": {
+      "content": "다음 시간에 물감 표현 놀이를 하고 싶어함",
+      "quote": "다음엔 물감으로 손도장 찍자고 이야기하며 놀이를 마쳤습니다"
+    },
+    "traitHints": []
   },
   {
+    "noteId": "a-03",
+    "date": "2026-07-30",
+    "ageMonths": 27,
+    "activityTags": [
+      "미술 놀이",
+      "만들기",
+      "역할 놀이"
+    ],
+    "materials": [
+      "스케치북",
+      "크레파스",
+      "아이스크림 교구",
+      "물티슈"
+    ],
     "positiveSignals": [
       {
-        "content": "선을 긋는 걸 좋아했어요",
-        "traitId": "lines"
+        "content": "선 그리기 미술활동에 적극 호응",
+        "quote": "손가락에 크레용을 쥐고 선을 긋는 걸 좋아하더라구요ㅎㅎ"
+      },
+      {
+        "content": "스스로 정리정돈 습관 훌륭함",
+        "quote": "물티슈로 손을 닦으며 정리를 씩씩하게 잘해주었습니다"
       }
     ],
     "negativeSignals": [],
-    "traitHints": [
-      {
-        "traitId": "clinging",
-        "strength": "weak"
-      },
-      "shy"
-    ]
+    "unfinished": null,
+    "traitHints": []
   },
   {
+    "noteId": "a-04",
+    "date": "2026-08-06",
+    "ageMonths": 27,
+    "activityTags": [
+      "역할 놀이",
+      "만들기",
+      "책 읽기"
+    ],
+    "materials": [
+      "병원놀이 세트",
+      "토끼인형",
+      "플레이콘",
+      "스케치북",
+      "스티커"
+    ],
     "positiveSignals": [
       {
-        "content": "병원놀이를 즐겼습니다 🩺",
-        "traitId": "놀이"
-      },
-      {
-        "content": "만들기 활동을 했습니다 🎨",
-        "traitId": "만들기"
+        "content": "병원놀이를 가상약국으로 창의적 확장",
+        "quote": "플레이콘으로 알록달록 알약을 만들어서 약국 놀이까지 이어서 진행했답니다"
       }
     ],
     "negativeSignals": [],
-    "traitHints": [
-      {
-        "strength": "strong",
-        "traitId": "attached"
-      }
-    ]
+    "unfinished": null,
+    "traitHints": []
   },
   {
+    "noteId": "a-05",
+    "date": "2026-08-13",
+    "ageMonths": 28,
+    "activityTags": [
+      "미술 놀이",
+      "촉감 놀이",
+      "만들기"
+    ],
+    "materials": [
+      "물감",
+      "스케치북",
+      "물티슈",
+      "플레이콘"
+    ],
     "positiveSignals": [
       {
-        "content": "물감 놀이에 대한 흥미",
-        "traitId": "미술"
-      },
-      {
-        "content": "플레이콘 붙이기로 액자 꾸미기",
-        "traitId": "놀이"
+        "content": "물감 손도장 촉감 탐색 성공",
+        "quote": "물티슈로 닦아가며 신나게 손도장을 남겼답니다"
       }
     ],
-    "traitHints": [
+    "negativeSignals": [],
+    "unfinished": {
+      "content": "물감 놀이 스케치북 액자 완성을 다음 시간에 이어서 하고 싶어함",
+      "quote": "액자가 다 마르면 다음 시간에 스티커 더 붙이자고 약속했어요"
+    },
+    "traitHints": []
+  },
+  {
+    "noteId": "a-06",
+    "date": "2026-08-20",
+    "ageMonths": 28,
+    "activityTags": [
+      "만들기",
+      "역할 놀이",
+      "촉감 놀이"
+    ],
+    "materials": [
+      "클레이",
+      "스티커",
+      "스케치북"
+    ],
+    "positiveSignals": [
       {
-        "traitId": "cling",
-        "strength": "weak"
+        "content": "클레이 반죽으로 빵집 사장님 대화 상호작용 풍성",
+        "quote": "\"무슨 빵 드릴까요?\" 묻는 모습이 아주 다정했어요^^"
       }
-    ]
+    ],
+    "negativeSignals": [],
+    "unfinished": null,
+    "traitHints": []
   },
   {
-    "traitId": "clay",
-    "content": "\"클레이 점토를 조물조물 반죽해서 빵 만들기 놀이를 했습니다. 🍞\""
+    "noteId": "a-07",
+    "date": "2026-08-27",
+    "ageMonths": 28,
+    "activityTags": [
+      "책 읽기",
+      "만들기",
+      "블록 놀이"
+    ],
+    "materials": [
+      "그림책",
+      "블록",
+      "토끼인형"
+    ],
+    "positiveSignals": [
+      {
+        "content": "책 내용과 연계한 블록 기차 만들기 창의성",
+        "quote": "그림책에 나오는 기차를 블록으로 만들어보았습니다"
+      }
+    ],
+    "negativeSignals": [],
+    "unfinished": null,
+    "traitHints": []
   },
   {
-    "traitId": "clinging",
-    "content": "기차를 블록으로 만들어보았습니다 🚂"
+    "noteId": "a-08",
+    "date": "2026-09-03",
+    "ageMonths": 28,
+    "activityTags": [
+      "블록 놀이",
+      "역할 놀이",
+      "만들기"
+    ],
+    "materials": [
+      "만들기",
+      "스티커"
+    ],
+    "positiveSignals": [
+      {
+        "content": "역할 놀이",
+        "quote": "역할 놀이"
+      }
+    ],
+    "negativeSignals": [],
+    "preferences": {
+      "themes": [
+        {
+          "content": "역할 놀이",
+          "quote": ""
+        }
+      ]
+    },
+    "flow": null,
+    "continuity": null,
+    "traitHints": []
   },
   {
-    "traitId": "clinging",
-    "content": "구O윤은 병원놀이 진찰실에서 주사를 놓아주고 스티커 칭찬 밴드를 착 붙여주는 다정한 시간을 즐겼습니다."
+    "noteId": "a-09",
+    "date": "2026-09-10",
+    "ageMonths": 29,
+    "activityTags": [
+      "만들기",
+      "미술 놀이",
+      "역할 놀이"
+    ],
+    "materials": [
+      "플레이콘",
+      "물티슈",
+      "스케치북",
+      "크레파스"
+    ],
+    "positiveSignals": [
+      {
+        "content": "생일 케이크 만들기 및 역할놀이 몰입",
+        "quote": "초를 끄는 역할놀이로 한참 웃었어요^^"
+      }
+    ],
+    "negativeSignals": [],
+    "unfinished": null,
+    "traitHints": []
   },
   {
-    "traitId": "play",
-    "content": "구O윤은 만들기, 미술 놀이, 역할 놀이를 즐겼습니다."
+    "noteId": "a-10",
+    "date": "2026-09-17",
+    "ageMonths": 29,
+    "activityTags": [
+      "책 읽기",
+      "촉감 놀이",
+      "만들기"
+    ],
+    "materials": [
+      "그림책",
+      "클레이",
+      "물티슈"
+    ],
+    "positiveSignals": [
+      {
+        "content": "동화 연계 클레이 만들기 상호작용",
+        "quote": "애벌레 집을 그림책 옆에 예쁘게 놓아주었습니다"
+      }
+    ],
+    "negativeSignals": [],
+    "unfinished": null,
+    "traitHints": []
   },
   {
-    "traitId": "clinging",
-    "content": "구O윤은 클레이 반죽으로 알록달록 애벌레를 만들어보았어요 🐛"
+    "noteId": "a-11",
+    "date": "2026-09-24",
+    "ageMonths": 29,
+    "activityTags": [
+      "역할 놀이",
+      "블록 놀이",
+      "만들기"
+    ],
+    "materials": [
+      "병원놀이 세트",
+      "블록",
+      "토끼인형"
+    ],
+    "positiveSignals": [
+      {
+        "content": "선생님과의 상호 역할놀이 정서적 교감 우수",
+        "quote": "선생님이 아픈 환자 역할을 맡아 진찰받고"
+      }
+    ],
+    "negativeSignals": [],
+    "unfinished": null,
+    "traitHints": []
   },
   {
-    "traitId": "play",
-    "content": "구O윤은 병원놀이 세트와 블록으로 큰 종합병원을 지었어요 🏥"
-  },
-  {
-    "traitId": "attached",
-    "strength": "weak"
+    "noteId": "a-12",
+    "date": "2026-10-01",
+    "ageMonths": 29,
+    "activityTags": [
+      "책 읽기",
+      "미술 놀이",
+      "역할 놀이"
+    ],
+    "materials": [
+      "그림책",
+      "스케치북",
+      "크레파스",
+      "스티커"
+    ],
+    "positiveSignals": [
+      {
+        "content": "계절 주제 미술 및 가게놀이 언어적 표현 우수",
+        "quote": "\"단풍잎 하나에 백원이요~\" 주거니 받거니 재미있게 보냈습니다^^"
+      }
+    ],
+    "negativeSignals": [],
+    "unfinished": null,
+    "traitHints": []
   }
 ]

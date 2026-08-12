@@ -1,18 +1,55 @@
 [
   {
+    "noteId": "c-01",
+    "date": "2026-10-05",
+    "ageMonths": 24,
+    "activityTags": [
+      "촉감 놀이",
+      "그림책"
+    ],
+    "materials": [
+      "그림책",
+      "딸랑이 공"
+    ],
     "positiveSignals": [
       {
-        "content": "밝게 웃으며 첫 인사를 해주었어요 😊"
-      },
-      {
-        "traitId": "clinging",
-        "quote": "2세 여아 이O아의 촉감 놀이에 흥미가 있었어요."
+        "content": "선호 놀이/테마",
+        "quote": "밝게 웃으며 첫 인사를 해주었어요 😊"
       }
     ],
-    "negativeSignal": "none"
+    "negativeSignals": [],
+    "preferences": {
+      "themes": [
+        {
+          "content": "선호 놀이/테마",
+          "quote": "밝게 웃으며 첫 인사를 해주었어요 😊"
+        }
+      ]
+    },
+    "flow": null,
+    "continuity": null,
+    "traitHints": []
   },
   {
-    "traitId": "play",
-    "content": "촉감 놀이, 만들기"
+    "noteId": "c-02",
+    "date": "2026-10-08",
+    "ageMonths": 24,
+    "activityTags": [
+      "촉감 놀이",
+      "만들기"
+    ],
+    "materials": [
+      "플레이콘",
+      "그림 도안"
+    ],
+    "positiveSignals": [
+      {
+        "content": "리듬에 맞춰 짝짝꿍 상호작용 만점",
+        "quote": "노래에 맞춰 짝짝꿍 손뼉을 치며 신나게 놀이"
+      }
+    ],
+    "negativeSignals": [],
+    "unfinished": null,
+    "traitHints": []
   }
 ]
