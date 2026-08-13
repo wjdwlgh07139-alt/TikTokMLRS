@@ -314,13 +314,18 @@ export default function PrepDashboard({ childIdParam, onNavigate, onStartRehears
 
         {/* Hero Header */}
         <div className="hero">
-          <span className="chip">담당 아동 {childrenList.length}명</span>
+          <span className="hero-top-chip">담당 아동 {childrenList.length}명</span>
           <h1>
-            수업 전, <b>돌봄 노트</b>로 아이 성향을 확인하세요
+            수업 전, <b>돌봄 노트</b>로<br />아이 성향을 확인하세요
           </h1>
           <p>
             방문 전 담당 아동의 돌봄 노트를 분석하여 준비물 체크리스트와 맞춤 리허설을 추천해 드립니다.
           </p>
+          <div className="feature-pills">
+            <span className="pill-cyan">노트 분석</span>
+            <span className="pill-green">체크리스트</span>
+            <span className="pill-yellow">맞춤 리허설</span>
+          </div>
         </div>
 
         <div className="pad">
@@ -331,7 +336,7 @@ export default function PrepDashboard({ childIdParam, onNavigate, onStartRehears
             </div>
 
             <div className="prep-child-list">
-              {childrenList.map((child) => {
+              {childrenList.map((child, idx) => {
                 const name = child.childName || child.name || "아동";
                 const age = child.ageMonths || child.age || 0;
                 const genderStr = child.gender || "";
@@ -347,9 +352,7 @@ export default function PrepDashboard({ childIdParam, onNavigate, onStartRehears
                     className="check-child-card"
                     onClick={() => onNavigate(`/prep/${child.id}`)}
                   >
-                    <div className="child-avatar-circle">
-                      {genderStr === "여아" ? "👧" : "👦"}
-                    </div>
+                    <div className="card-num-badge">{String(idx + 1).padStart(2, '0')}</div>
                     <div className="child-card-main">
                       <div className="child-card-title-row">
                         <span className="child-card-name">{name}</span>
@@ -415,7 +418,7 @@ export default function PrepDashboard({ childIdParam, onNavigate, onStartRehears
 
       {/* Hero Header matching first-care-guide.html */}
       <div className="hero">
-        <span className="chip">
+        <span className="hero-top-chip">
           {childName} · {ageMonths}개월 ({gender})
         </span>
         <h1>
@@ -424,6 +427,11 @@ export default function PrepDashboard({ childIdParam, onNavigate, onStartRehears
         <p>
           총 <b>{totalNotesCount}건</b>의 작성된 돌봄 노트를 분석하여 전달하는 맞춤 수업 준비 참고서입니다.
         </p>
+        <div className="feature-pills">
+          <span className="pill-cyan">준비물 체크</span>
+          <span className="pill-green">이전 약속</span>
+          <span className="pill-pink">선호 놀이</span>
+        </div>
       </div>
 
       <div className="pad">
@@ -540,7 +548,7 @@ export default function PrepDashboard({ childIdParam, onNavigate, onStartRehears
             <div className="sec-h">
               <span className="sec-n">{secNum++}</span>
               <span className="sec-t">진행 참고</span>
-              <span className="chip" style={{ background: "var(--pink)", color: "#fff", fontSize: "11px" }}>4회차 이상 패턴</span>
+              <span className="chip" style={{ background: "var(--p1)", color: "var(--tictoc-black)", fontSize: "11px", fontWeight: 800 }}>4회차 이상 패턴</span>
             </div>
             <p className="sec-d">아동과 가장 유연하게 잘 풀렸던 수업 진행 순서 및 스타일 참고서입니다.</p>
 
@@ -548,7 +556,7 @@ export default function PrepDashboard({ childIdParam, onNavigate, onStartRehears
               {flowPattern.warmup && (
                 <div className="step" style={{ padding: "10px 0" }}>
                   <div style={{ display: "flex", alignItems: "flex-start", gap: "10px", marginBottom: "4px" }}>
-                    <span className="chip" style={{ background: "var(--cyan)", color: "#fff", fontWeight: 800, flexShrink: 0, whiteSpace: "nowrap", minWidth: "48px", textAlign: "center", padding: "4px 10px", borderRadius: "8px" }}>도입</span>
+                    <span className="chip" style={{ background: "var(--c1)", color: "var(--tictoc-black)", fontWeight: 800, flexShrink: 0, whiteSpace: "nowrap", minWidth: "48px", textAlign: "center", padding: "4px 10px", borderRadius: "12px" }}>도입</span>
                     <span style={{ fontSize: "15px", fontWeight: 800, color: "var(--ink)", flex: 1, lineHeight: 1.5 }}>{flowPattern.warmup.content}</span>
                   </div>
                   {flowPattern.warmup.quote && <p className="say" style={{ marginTop: "6px" }}>&quot;{flowPattern.warmup.quote}&quot;</p>}
@@ -558,7 +566,7 @@ export default function PrepDashboard({ childIdParam, onNavigate, onStartRehears
               {flowPattern.leadStyle && (
                 <div className="step" style={{ padding: "10px 0", borderTop: "1px dashed var(--line)" }}>
                   <div style={{ display: "flex", alignItems: "flex-start", gap: "10px", marginBottom: "4px" }}>
-                    <span className="chip" style={{ background: "var(--cyan)", color: "#fff", fontWeight: 800, flexShrink: 0, whiteSpace: "nowrap", minWidth: "48px", textAlign: "center", padding: "4px 10px", borderRadius: "8px" }}>주도</span>
+                    <span className="chip" style={{ background: "var(--c1)", color: "var(--tictoc-black)", fontWeight: 800, flexShrink: 0, whiteSpace: "nowrap", minWidth: "48px", textAlign: "center", padding: "4px 10px", borderRadius: "12px" }}>주도</span>
                     <span style={{ fontSize: "15px", fontWeight: 800, color: "var(--ink)", flex: 1, lineHeight: 1.5 }}>{flowPattern.leadStyle.content}</span>
                   </div>
                   {flowPattern.leadStyle.quote && <p className="say" style={{ marginTop: "6px" }}>&quot;{flowPattern.leadStyle.quote}&quot;</p>}
@@ -568,7 +576,7 @@ export default function PrepDashboard({ childIdParam, onNavigate, onStartRehears
               {flowPattern.closing && (
                 <div className="step" style={{ padding: "10px 0", borderTop: "1px dashed var(--line)" }}>
                   <div style={{ display: "flex", alignItems: "flex-start", gap: "10px", marginBottom: "4px" }}>
-                    <span className="chip" style={{ background: "var(--cyan)", color: "#fff", fontWeight: 800, flexShrink: 0, whiteSpace: "nowrap", minWidth: "48px", textAlign: "center", padding: "4px 10px", borderRadius: "8px" }}>마무리</span>
+                    <span className="chip" style={{ background: "var(--c1)", color: "var(--tictoc-black)", fontWeight: 800, flexShrink: 0, whiteSpace: "nowrap", minWidth: "48px", textAlign: "center", padding: "4px 10px", borderRadius: "12px" }}>마무리</span>
                     <span style={{ fontSize: "15px", fontWeight: 800, color: "var(--ink)", flex: 1, lineHeight: 1.5 }}>{flowPattern.closing.content}</span>
                   </div>
                   {flowPattern.closing.quote && <p className="say" style={{ marginTop: "6px" }}>&quot;{flowPattern.closing.quote}&quot;</p>}

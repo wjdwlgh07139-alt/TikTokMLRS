@@ -95,16 +95,30 @@ export default function HomeView({ onSelect }) {
 
   return (
     <>
+      {/* Screenshot-inspired Onboarding Top Bar */}
+      <div className="onboarding-top-bar">
+        <span className="onboarding-title">첫 돌봄 온보딩</span>
+      </div>
+
       <div className="hero">
+        <span className="hero-top-chip">신입 악어선생님을 위한</span>
         <h1>🐣 째깍 리허설</h1>
         <p className="sub">
-          진짜 만남 전에, 상황 하나를 골라 3~4번만 짧게 미리 연습해봐요.
+          상황을 고르면 기준 · 문장 · 다음 행동이 나와요. 상황 하나를 골라 3~4번만 짧게 미리 연습해봐요.
         </p>
+
+        <div className="feature-pills">
+          <span className="pill-cyan">13가지 상황</span>
+          <span className="pill-green">시점별 검색</span>
+          <span className="pill-pink">문장 바로 복사</span>
+        </div>
+
         <div className="seg" role="tablist">
           <button
             role="tab"
             data-cat="child"
             aria-selected={activeCat === "child"}
+            className={activeCat === "child" ? "active" : ""}
             onClick={() => setActiveCat("child")}
           >
             아이와 만나기 <span className="cnt">{childCount}</span>
@@ -113,6 +127,7 @@ export default function HomeView({ onSelect }) {
             role="tab"
             data-cat="parent"
             aria-selected={activeCat === "parent"}
+            className={activeCat === "parent" ? "active" : ""}
             onClick={() => setActiveCat("parent")}
           >
             부모님과 대화 <span className="cnt">{parentCount}</span>
@@ -123,7 +138,7 @@ export default function HomeView({ onSelect }) {
       <div className="explain">{EXPLAIN[activeCat]}</div>
 
       <div key={activeCat} className="rehearsal-list swap">
-        {currentScenarios.map((s) => (
+        {currentScenarios.map((s, index) => (
           <button
             key={s.id}
             className="card"
@@ -133,7 +148,7 @@ export default function HomeView({ onSelect }) {
             onClick={() => setSheetScenario(s)}
           >
             <div className="c-top">
-              <div className="avatar">{s.emoji}</div>
+              <div className="card-num-badge">{String(index + 1).padStart(2, '0')}</div>
               <div className="c-main">
                 <div className="c-title">{s.title}</div>
                 <div className="c-situation">{s.situation}</div>
@@ -142,7 +157,6 @@ export default function HomeView({ onSelect }) {
                 <span className="age">
                   {s.group === "child" ? "아이" : "보호자"}
                 </span>
-                <span className="chev">›</span>
               </div>
             </div>
 
@@ -168,6 +182,16 @@ export default function HomeView({ onSelect }) {
         ))}
       </div>
 
+      {/* AI Conversation Disclaimer Notice Card */}
+      <div className="guide-policy-card">
+        <div className="notice-eyebrow">AI REHEARSAL NOTICE</div>
+        <h3 className="notice-title">AI 대화 및 리허설 이용 유의사항</h3>
+        <p className="notice-body">
+          AI 모델의 답변은 실제 상황 및 보호자와의 대화와 다를 수 있으며, 실수나 오류가 발생할 수 있습니다. 본 서비스는 연습 참고용이며, 실제 현장에서의 최종 대화 및 대응에 대한 책임은 사용자 본인에게 있습니다.
+        </p>
+      </div>
+
+
       {/* Bottom Sheet Drawer Modal */}
       <div
         className={`scrim ${sheetScenario ? "open" : ""}`}
@@ -184,17 +208,6 @@ export default function HomeView({ onSelect }) {
           >
             <div className="grab" />
             <div className="sheet-head">
-              <div
-                className="avatar"
-                style={{
-                  background:
-                    sheetScenario.group === "child"
-                      ? "var(--child-soft)"
-                      : "var(--parent-soft)",
-                }}
-              >
-                {sheetScenario.emoji}
-              </div>
               <div>
                 <h2 id="sheetTitle">{sheetScenario.title}</h2>
                 <div className="sh-age">

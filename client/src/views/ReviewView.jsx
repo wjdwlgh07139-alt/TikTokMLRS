@@ -44,8 +44,7 @@ export default function ReviewView({ scenario, transcript, extraInfo, onRetry, o
         <div className="review-loading-card">
           <div className="coach-avatar-wrapper">
             <div className="coach-pulse-ring"></div>
-            <div className="coach-avatar-icon">🧑‍🏫</div>
-            <div className="coach-sparkle">✨</div>
+            <div className="coach-avatar-icon" style={{ fontSize: "20px", fontWeight: 800 }}>AI</div>
           </div>
 
           <h3 className="review-loading-title">
