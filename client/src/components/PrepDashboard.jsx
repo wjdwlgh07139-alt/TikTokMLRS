@@ -528,7 +528,7 @@ export default function PrepDashboard({ childIdParam, onNavigate, onStartRehears
               <p className="check-s">2회 이상 높은 흥미와 긍정적 반응을 얻은 선호 항목입니다.</p>
               <div style={{ marginTop: "12px", display: "flex", flexWrap: "wrap", gap: "8px" }}>
                 {preferenceItems.map((p, idx) => (
-                  <span key={idx} className="chip" style={{ background: "var(--cyan-soft)", color: "var(--cyan-deep)", padding: "6px 12px", borderRadius: "100px", fontSize: "14px", fontWeight: 700 }}>
+                  <span key={idx} className="chip" style={{ background: "var(--c5)", color: "var(--tictoc-black)", padding: "6px 12px", borderRadius: "var(--radius-btn)", fontSize: "14px", fontWeight: 700 }}>
                     💕 {p.content} <b>({p.count}회 등장)</b>
                   </span>
                 ))}
