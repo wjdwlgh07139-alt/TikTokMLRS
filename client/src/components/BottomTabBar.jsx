@@ -1,5 +1,13 @@
 export default function BottomTabBar({ currentPath, onNavigate }) {
-  const norm = currentPath.startsWith("/prep") ? "/prep" : currentPath === "" ? "/" : currentPath;
+  const norm = currentPath.startsWith("/prep")
+    ? "/prep"
+    : currentPath === ""
+    ? "/"
+    : currentPath === "/careendtemplate" ||
+      currentPath === "/careendtemplete" ||
+      currentPath === "/contact/closing"
+    ? "/contact/matching"
+    : currentPath;
 
   const tabs = [
     { id: "/", label: "리허설", icon: "🎭" },

@@ -303,18 +303,13 @@ export default function PrepDashboard({ childIdParam, onNavigate, onStartRehears
   if (!selectedChildId) {
     return (
       <div className="prep-container">
-        {/* Sticky Appbar */}
-        <div className="appbar">
-          <span className="back" onClick={() => onNavigate("/")} aria-label="홈으로">
-            ‹
-          </span>
-          <span className="ttl">수업 준비 도우미</span>
-          <span className="sp"></span>
+        {/* Header Bar */}
+        <div className="onboarding-top-bar">
+          <span className="onboarding-title">째깍악어 | 악어선생님 온보딩</span>
         </div>
 
         {/* Hero Header */}
         <div className="hero">
-          <span className="hero-top-chip">담당 아동 {childrenList.length}명</span>
           <h1>
             수업 전, <b>돌봄 노트</b>로<br />아이 성향을 확인하세요
           </h1>

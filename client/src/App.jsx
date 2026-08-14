@@ -147,11 +147,7 @@ export default function App() {
         </>
       )}
 
-      {currentPath !== "/careendtemplete" &&
-        currentPath !== "/careendtemplate" &&
-        currentPath !== "/contact/closing" && (
-          <BottomTabBar currentPath={currentPath} onNavigate={handleNavigate} />
-        )}
+      <BottomTabBar currentPath={currentPath} onNavigate={handleNavigate} />
     </div>
   );
 }

@@ -109,7 +109,7 @@ export default function HomeView({ onSelect, onStartRehearsalFromRec }) {
       <div className="hero">
         <h1>🐣 째깍 리허설</h1>
         <p className="sub">
-          상황을 고르면 기준 · 문장 · 다음 행동이 나와요. 상황 하나를 골라 3~4번만 짧게 미리 연습해봐요.
+          실제 돌봄 현장처럼 AI와 직접 1:1로 대화하며 아이를 대하는 요령을 익히는 연습 공간이에요. 상황을 골라 3~4번만 가볍게 말을 건네보며 아이에게 다가가는 자신감을 키워보세요.
         </p>
 
         <div className="seg" role="tablist">
