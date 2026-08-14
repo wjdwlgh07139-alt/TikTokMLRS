@@ -1,0 +1,184 @@
+[
+  {
+    "noteId": "b-01",
+    "date": "2026-09-01",
+    "ageMonths": 30,
+    "activityTags": [
+      "자동차 놀이",
+      "블록 놀이"
+    ],
+    "materials": [
+      "타요 자동차",
+      "미니카",
+      "블록"
+    ],
+    "positiveSignals": [
+      {
+        "content": "좋아하는 자동차 교구로 안정을 찾음",
+        "quote": "타요 자동차와 미니카를 보여주고 주차장 타워 블록을 같이 만들어주니 조금 안정을 찾았습니다^^"
+      }
+    ],
+    "negativeSignals": [
+      {
+        "content": "부모 분리시 불안 신호 강함",
+        "quote": "엄마가 문을 닫고 나가시자마자 울먹이며 \"엄마 언제 와요? 엄마 어디 갔어요\"를 계속 반복했어요"
+      }
+    ],
+    "unfinished": null,
+    "traitHints": [
+      {
+        "traitId": "cling",
+        "strength": "strong",
+        "quote": "엄마가 문을 닫고 나가시자마자 울먹이며 \"엄마 언제 와요? 엄마 어디 갔어요\"를 계속 반복했어요"
+      }
+    ]
+  },
+  {
+    "noteId": "b-02",
+    "date": "2026-09-08",
+    "ageMonths": 30,
+    "activityTags": [
+      "자동차 놀이",
+      "만들기"
+    ],
+    "materials": [
+      "만들기",
+      "자동차 놀이"
+    ],
+    "positiveSignals": [
+      {
+        "content": "콧물, 만들기",
+        "quote": "콧물, 만들기"
+      }
+    ],
+    "negativeSignals": [
+      {
+        "content": "분리 불안 지속",
+        "quote": "현관문을 보며 \"엄마 보고 싶어요\" 라며 훌쩍였어요"
+      }
+    ],
+    "preferences": {
+      "themes": [
+        {
+          "content": "콧물, 만들기",
+          "quote": ""
+        }
+      ]
+    },
+    "flow": {
+      "content": "확장 중인 놀이",
+      "quote": ""
+    },
+    "continuity": null,
+    "traitHints": [
+      {
+        "traitId": "cling",
+        "strength": "strong",
+        "quote": "현관문을 보며 \"엄마 보고 싶어요\" 라며 훌쩍였어요"
+      }
+    ]
+  },
+  {
+    "noteId": "b-03",
+    "date": "2026-09-15",
+    "ageMonths": 30,
+    "activityTags": [
+      "자동차 놀이",
+      "블록 놀이",
+      "그림책"
+    ],
+    "materials": [
+      "미니카",
+      "블록",
+      "그림책"
+    ],
+    "positiveSignals": [
+      {
+        "content": "시계 약속에 적응하고 자율적 놀이 참여",
+        "quote": "\"응, 바늘 6!\" 하고 대답하고 다시 자동차 블록 트랙 조립에 열중했습니다!"
+      }
+    ],
+    "negativeSignals": [
+      {
+        "content": "엄마 확인 발화 여전히 존재",
+        "quote": "놀이 중간중간 \"엄마 몇 시에 오지요?\" 물어보는"
+      }
+    ],
+    "unfinished": null,
+    "traitHints": [
+      {
+        "traitId": "cling",
+        "strength": "weak",
+        "quote": "놀이 중간중간 \"엄마 몇 시에 오지요?\" 물어보는"
+      }
+    ]
+  },
+  {
+    "noteId": "b-04",
+    "date": "2026-09-22",
+    "ageMonths": 30,
+    "activityTags": [
+      "자동차 놀이",
+      "미술 놀이"
+    ],
+    "materials": [
+      "자동차 그림 그리기",
+      "미니카 놀이"
+    ],
+    "positiveSignals": [
+      {
+        "content": "놀이 활동 테마",
+        "quote": "원문 문장"
+      }
+    ],
+    "negativeSignals": [],
+    "preferences": {
+      "themes": [
+        {
+          "content": "놀이 활동 테마",
+          "quote": "원문 문장"
+        }
+      ]
+    },
+    "flow": {
+      "content": "확장 중인 놀이",
+      "quote": "원문 문장"
+    },
+    "continuity": null,
+    "traitHints": []
+  },
+  {
+    "noteId": "b-05",
+    "date": "2026-09-29",
+    "ageMonths": 30,
+    "activityTags": [
+      "블록 놀이",
+      "자동차 놀이"
+    ],
+    "materials": [
+      "블록 놀이",
+      "자동차 놀이"
+    ],
+    "positiveSignals": [
+      {
+        "content": "주도적으로 건설하는 과정",
+        "quote": "주도적으로 건설하는 과정"
+      }
+    ],
+    "negativeSignals": [],
+    "preferences": {
+      "themes": [
+        {
+          "content": "주도적으로 건설하는 과정",
+          "quote": ""
+        }
+      ]
+    },
+    "flow": {
+      "content": "놀이의 흐름",
+      "quote": ""
+    },
+    "continuity": null,
+    "traitHints": []
+  }
+]

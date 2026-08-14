@@ -38,9 +38,6 @@ export default function BlindGuessModal({ actualTrait, log, onComplete }) {
       <div className="sheet blind-guess-sheet" role="dialog" aria-modal="true">
         <div className="grab" />
         <div className="sheet-head">
-          <div className="avatar" style={{ background: "#EFF6FF" }}>
-            🔍
-          </div>
           <div>
             <h2>아이 성향 추측하기</h2>
             <div className="sh-age">

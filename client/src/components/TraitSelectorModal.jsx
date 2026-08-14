@@ -28,9 +28,6 @@ export default function TraitSelectorModal({ scenario, onConfirm, onClose }) {
       <div className="sheet trait-selector-sheet" role="dialog" aria-modal="true">
         <div className="grab" />
         <div className="sheet-head">
-          <div className="avatar" style={{ background: "var(--child-soft, #EEF2FF)" }}>
-            {scenario.emoji}
-          </div>
           <div>
             <h2>아이 보조 성향(Trait) 선택</h2>
             <div className="sh-age">

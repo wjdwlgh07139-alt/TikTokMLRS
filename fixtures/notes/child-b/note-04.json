@@ -1,0 +1,31 @@
+{
+  "noteId": "b-04",
+  "date": "2026-09-22",
+  "ageMonths": 30,
+  "childName": "김O준",
+  "gender": "남아",
+  "rawNote": "2026년 9월 22일\n김O준 · 2세(30개월) · 남아 / 놀이\n태그: 자동차 놀이, 미술 놀이\n\n[활동 내용]\n스케치북에 도로 그림을 그리고 미니카를 굴렸어요 🚗\n이날은 엄마를 찾는 울음은 없었지만, 소리가 큰 밖의 소음이 나자 순간 깜짝 놀라며 안겨 들었습니다^^",
+  "extracted": {
+    "noteId": "b-04",
+    "date": "2026-09-22",
+    "ageMonths": 30,
+    "activityTags": [
+      "자동차 놀이",
+      "미술 놀이"
+    ],
+    "materials": [
+      "스케치북",
+      "크레파스",
+      "미니카"
+    ],
+    "positiveSignals": [
+      {
+        "content": "울음 없이 미술과 자동차 연계 놀이 성공",
+        "quote": "이날은 엄마를 찾는 울음은 없었지만"
+      }
+    ],
+    "negativeSignals": [],
+    "unfinished": null,
+    "traitHints": []
+  }
+}

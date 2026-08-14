@@ -1,0 +1,32 @@
+{
+  "noteId": "a-08",
+  "date": "2026-09-03",
+  "ageMonths": 28,
+  "childName": "구O윤",
+  "gender": "여아",
+  "rawNote": "2026년 9월 3일\n구O윤 · 2세(28개월) · 여아 / 놀이\n태그: 블록 놀이, 역할 놀이, 만들기\n\n[활동 내용]\n블록으로 높은 탑을 쌓아 올린 후 병원놀이 진찰실을 만들었어요 🏥\n의사선생님 OO이가 주사도 놓아주고 스티커 칭찬 밴드도 착 붙여주는 다정한 시간이었습니다 ㅎㅎ",
+  "extracted": {
+    "noteId": "a-08",
+    "date": "2026-09-03",
+    "ageMonths": 28,
+    "activityTags": [
+      "블록 놀이",
+      "역할 놀이",
+      "만들기"
+    ],
+    "materials": [
+      "블록",
+      "병원놀이 세트",
+      "스티커"
+    ],
+    "positiveSignals": [
+      {
+        "content": "블록 진찰실 구성 및 다정한 정서 교감",
+        "quote": "주사도 놓아주고 스티커 칭찬 밴드도 착 붙여주는 다정한 시간"
+      }
+    ],
+    "negativeSignals": [],
+    "unfinished": null,
+    "traitHints": []
+  }
+}

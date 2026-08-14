@@ -376,7 +376,7 @@ export default function ClosingContact() {
             </div>
 
             {currentIssueItem.severity === "followup" && (
-              <div className="field full" style={{ fontSize: "0.82rem", color: "#c9524e", fontWeight: "600" }}>
+              <div className="field full" style={{ fontSize: "0.85rem", color: "var(--ink-2)", fontWeight: "700" }}>
                 📢 [공유 필요 사안] 이 항목은 활동 중 보호자 및 운영본부에 사전 공유가 필요한 사안입니다.
               </div>
             )}

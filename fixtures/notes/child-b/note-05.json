@@ -1,0 +1,30 @@
+{
+  "noteId": "b-05",
+  "date": "2026-09-29",
+  "ageMonths": 30,
+  "childName": "김O준",
+  "gender": "남아",
+  "rawNote": "2026년 9월 29일\n김O준 · 2세(30개월) · 남아 / 놀이\n태그: 블록 놀이, 자동차 놀이\n\n[활동 내용]\n블록으로 주차장 건물을 3층까지 멋지게 건설했어요!!\n엄마 오실 시간이 되자 \"선생님, 나 오늘 엄마 안 찾고 잘 놀았죠?\" 라며 씩씩하게 웃었습니다 🌟",
+  "extracted": {
+    "noteId": "b-05",
+    "date": "2026-09-29",
+    "ageMonths": 30,
+    "activityTags": [
+      "블록 놀이",
+      "자동차 놀이"
+    ],
+    "materials": [
+      "블록",
+      "미니카"
+    ],
+    "positiveSignals": [
+      {
+        "content": "성취감 느끼며 씩씩하게 놀이 마무리",
+        "quote": "\"선생님, 나 오늘 엄마 안 찾고 잘 놀았죠?\" 라며 씩씩하게 웃었습니다"
+      }
+    ],
+    "negativeSignals": [],
+    "unfinished": null,
+    "traitHints": []
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "noteId": "a-10",
+  "date": "2026-09-17",
+  "ageMonths": 29,
+  "childName": "구O윤",
+  "gender": "여아",
+  "rawNote": "2026년 9월 17일\n구O윤 · 2세(29개월) · 여아 / 놀이\n태그: 책 읽기, 촉감 놀이, 만들기\n\n[활동 내용]\n동화책을 읽은 후 클레이 반죽으로 알록달록 애벌레를 만들어보았어요 🐛\n물티슈로 손을 깨끗이 닦고 애벌레 집을 그림책 옆에 예쁘게 놓아주었습니다 ㅎㅎ",
+  "extracted": {
+    "noteId": "a-10",
+    "date": "2026-09-17",
+    "ageMonths": 29,
+    "activityTags": [
+      "책 읽기",
+      "촉감 놀이",
+      "만들기"
+    ],
+    "materials": [
+      "그림책",
+      "클레이",
+      "물티슈"
+    ],
+    "positiveSignals": [
+      {
+        "content": "동화 연계 클레이 만들기 상호작용",
+        "quote": "애벌레 집을 그림책 옆에 예쁘게 놓아주었습니다"
+      }
+    ],
+    "negativeSignals": [],
+    "unfinished": null,
+    "traitHints": []
+  }
+}

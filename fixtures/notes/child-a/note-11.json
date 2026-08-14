@@ -1,0 +1,32 @@
+{
+  "noteId": "a-11",
+  "date": "2026-09-24",
+  "ageMonths": 29,
+  "childName": "구O윤",
+  "gender": "여아",
+  "rawNote": "2026년 9월 24일\n구O윤 · 2세(29개월) · 여아 / 놀이\n태그: 역할 놀이, 블록 놀이, 만들기\n\n[활동 내용]\n병원놀이 세트와 블록으로 큰 종합병원을 지었어요 🏥\n선생님이 아픈 환자 역할을 맡아 진찰받고 토끼인형도 쾌유 소식을 들었답니다 ㅎㅎ",
+  "extracted": {
+    "noteId": "a-11",
+    "date": "2026-09-24",
+    "ageMonths": 29,
+    "activityTags": [
+      "역할 놀이",
+      "블록 놀이",
+      "만들기"
+    ],
+    "materials": [
+      "병원놀이 세트",
+      "블록",
+      "토끼인형"
+    ],
+    "positiveSignals": [
+      {
+        "content": "선생님과의 상호 역할놀이 정서적 교감 우수",
+        "quote": "선생님이 아픈 환자 역할을 맡아 진찰받고"
+      }
+    ],
+    "negativeSignals": [],
+    "unfinished": null,
+    "traitHints": []
+  }
+}

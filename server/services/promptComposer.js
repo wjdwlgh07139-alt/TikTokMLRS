@@ -80,8 +80,8 @@ export function composeReviewPrompt({ title, transcript, trait, persona }) {
     .join("\n");
 
   const whitelistDesc = whitelist.length > 0
-    ? `이 시나리오에서 채점 가능한 기본 역량 항목: [${whitelist.join(", ")}]. 이 항목들 외의 기본 역량은 반드시 status: "no_opportunity", score: null로 평가하세요.`
-    : "대화 맥락에 따라 기회가 제공된 항목만 status: 'scored'로 채점하세요.";
+    ? `이 시나리오에서 채점 가능한 기본 역량 항목: [${whitelist.join(", ")}].`
+    : "대화 맥락에 따라 기회가 제공된 항목만 평가하세요.";
 
   return `당신은 째깍이의 선임 돌봄 코치입니다. 아래는 신입 돌봄 교사(사용자)가 '${title}' 상황에서 연습한 대화입니다.
 
@@ -96,45 +96,43 @@ ${rubricRequirements}
 실패 트리거 기준:
 ${failTriggerList}
 
+[★ 핵심 지침: 토큰 최적화 및 엄격한 JSON 출력]
+1. 중요 항목부터 출력하도록 필드 순서를 엄격히 준수하세요: triggeredFails → rubric → traitScores → improve → strengths → keep → overall
+2. no_opportunity (기회 없음) 항목은 JSON 배열에서 아예 생략(출력 제외)하세요. 서버가 자동 처리합니다.
+3. traitScores에서는 question, max 키를 출력하지 마세요 (서버가 자동 결합함).
+4. 각 텍스트 항목의 글자 수를 엄격히 제한하세요:
+   - evidence: 60자 이내
+   - why, suggestion, better: 50자 이내
+   - overall: 2문장 이내 (핵심만)
+
 반드시 아래 JSON 형식만 출력하세요:
 {
-  "overall": "따뜻한 총평 2~3문장",
-  "strengths": [{"quote":"실제 사용자 발화","why":"왜 좋았는지"}],
-  "improve": [{"quote":"아쉬운 실제 발화","suggestion":"무엇을 놓쳤는지","better":"이렇게 말해보세요 예시 대사"}],
+  "triggeredFails": [
+    {
+      "trigger": "발생한 실패 트리거 내용",
+      "turn": 선생님_발화_턴_번호(숫자 1~5),
+      "userQuote": "해당 턴 실제 발화",
+      "childReaction": "아이가 보인 반응"
+    }
+  ],
   "rubric": [
-    {"name":"관계·신뢰","status":"scored 또는 no_opportunity","score": 1~5 정수 또는 null},
-    {"name":"소통·전달","status":"scored 또는 no_opportunity","score": 1~5 정수 또는 null},
-    {"name":"정서 돌봄","status":"scored 또는 no_opportunity","score": 1~5 정수 또는 null},
-    {"name":"안전·약속 이행","status":"scored 또는 no_opportunity","score": 1~5 정수 또는 null},
-    {"name":"상황 대처","status":"scored 또는 no_opportunity","score": 1~5 정수 또는 null}
+    {"name": "기본역량명(관계·신뢰/소통·전달/정서 돌봄/안전·약속 이행/상황 대처)", "status": "scored", "score": 1~5 정수}
   ],
   "traitScores": [
     {
       "id": "루브릭ID",
-      "question": "루브릭 질문",
-      "status": "scored" 또는 "missed" 또는 "no_opportunity",
-      "score": 점수정수 또는 null,
-      "max": 만점,
-      "evidence": "기회가 있었던 턴 번호와 실제 발화 인용"
+      "status": "scored 또는 missed",
+      "score": 점수정수,
+      "evidence": "60자 이내 발화 인용 및 근거"
     }
   ],
-  "triggeredFails": [
-    {
-      "trigger": "발생한 실패 트리거 내용",
-      "turn": 선생님_발화_턴_번호(대화_기록의_[N턴]_숫자_1~5),
-      "userQuote": "트리거를 밟은 선생님의 해당 턴 실제 발화",
-      "childReaction": "그때 아이가 보인 반응 발화"
-    }
+  "improve": [
+    {"quote": "아쉬운 실제 발화", "suggestion": "50자 이내 조언", "better": "50자 이내 예시 대사"}
   ],
-  "keep": "다음 돌봄 때 기억할 한 문장"
-}
-
-규칙:
-1. 기회 판정 3상태 (★ 엄격 준수):
-   - "scored": 해당 행동이나 조치를 이행함.
-   - "missed": 기회가 명확히 주어졌으나 교사가 놓침. (반드시 턴 번호와 아이 발화를 인용할 것!)
-   - "no_opportunity": 대화 전개상 해당 질문에 해당하는 상호작용 기회가 주어지지 않거나 대화가 짧아 평가할 수 없음 (score는 null).
-   - missed로 판정하려면 기회가 발생한 턴 번호와 아이 발화를 반드시 인용해야 합니다. 인용할 수 없으면 no_opportunity로 판정하세요!
-2. 기본 역량 5개 항목 중 화이트리스트 외 항목은 반드시 status: "no_opportunity", score: null로 반환하세요.
-3. triggeredFails의 turn은 대화 기록에 표기된 [N턴]의 N과 정확히 일치해야 합니다.`;
+  "strengths": [
+    {"quote": "좋았던 실제 발화", "why": "50자 이내 이유"}
+  ],
+  "keep": "다음 돌봄 때 기억할 한 문장",
+  "overall": "2문장 이내의 따뜻하고 핵심적인 총평"
+}`;
 }
