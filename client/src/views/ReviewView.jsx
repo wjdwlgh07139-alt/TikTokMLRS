@@ -38,6 +38,9 @@ export default function ReviewView({ scenario, transcript, extraInfo, onRetry, o
     };
   }, [scenario, transcript, sessionId, traitId]);
 
+  const isParent = scenario.group === "parent" || scenario.category === "parent";
+  const counterpartName = isParent ? "보호자" : "아이";
+
   if (loading) {
     return (
       <div className="review-loading-container">
@@ -52,7 +55,9 @@ export default function ReviewView({ scenario, transcript, extraInfo, onRetry, o
           </h3>
 
           <p className="review-loading-subtitle">
-            선생님의 발화 템포, 교구 활용 및 아이 성향 맞춤 반응을 종합 리포트로 분석 중입니다.
+            {isParent
+              ? "선생님의 경청 태도, 보호자 맞춤 설명 및 신뢰 형성 대화를 종합 리포트로 분석 중입니다."
+              : "선생님의 발화 템포, 교구 활용 및 아이 성향 맞춤 반응을 종합 리포트로 분석 중입니다."}
           </p>
 
           <div className="loading-progress-bar">
@@ -102,7 +107,7 @@ export default function ReviewView({ scenario, transcript, extraInfo, onRetry, o
           <span className="icon">{guessResult.isCorrect ? "🎯" : "💡"}</span>
           <div>
             <b>블라인드 모드 추측 결과: {guessResult.isCorrect ? "정답!" : "오답"}</b>
-            <p>실제 아이 성향: {actualTrait?.label || "비밀"}</p>
+            <p>실제 {counterpartName} 성향: {actualTrait?.label || "비밀"}</p>
           </div>
         </div>
       )}
@@ -118,13 +123,17 @@ export default function ReviewView({ scenario, transcript, extraInfo, onRetry, o
       )}
 
       {data.levelHistory?.length > 0 && (
-        <LevelTrajectoryChart history={data.levelHistory} />
+        <LevelTrajectoryChart history={data.levelHistory} isParent={isParent} />
       )}
 
       {data.feedbackType === "silent" && data.checklists?.length > 0 && (
         <div className="review-section silent-checklists">
           <h2>🔍 상호작용 체크리스트</h2>
-          <p className="section-desc">아이가 부정 신호를 주지 않더라도 체크해야 할 핵심 요소입니다:</p>
+          <p className="section-desc">
+            {isParent
+              ? "보호자님이 직접적인 우려를 표현하지 않더라도 점검해야 할 핵심 대화 요소입니다:"
+              : "아이가 부정 신호를 주지 않더라도 체크해야 할 핵심 요소입니다:"}
+          </p>
           <div className="checklist-grid">
             {data.checklists.map((c, i) => (
               <div key={i} className="checklist-item">
@@ -139,7 +148,11 @@ export default function ReviewView({ scenario, transcript, extraInfo, onRetry, o
       {data.feedbackType === "signal" && data.triggeredFails?.length > 0 && (
         <div className="review-section fail-triggers">
           <h2>⚠️ 실패 트리거 감지</h2>
-          <p className="section-desc">대화 중 아이가 위축되거나 반응이 돌아선 순간입니다:</p>
+          <p className="section-desc">
+            {isParent
+              ? "대화 중 보호자님이 당황하거나 신뢰가 흔들린 순간입니다:"
+              : "대화 중 아이가 위축되거나 반응이 돌아선 순간입니다:"}
+          </p>
           {data.triggeredFails.map((ft, i) => (
             <div key={i} className="fail-trigger-card">
               <div className="ft-header">
@@ -155,7 +168,7 @@ export default function ReviewView({ scenario, transcript, extraInfo, onRetry, o
                   )}
                   {ft.childReaction && (
                     <div className="ft-quote child">
-                      <span className="q-label">🥺 아이 반응:</span> "{ft.childReaction}"
+                      <span className="q-label">🥺 {isParent ? "보호자 반응:" : "아이 반응:"}</span> "{ft.childReaction}"
                     </div>
                   )}
                 </div>
@@ -167,7 +180,7 @@ export default function ReviewView({ scenario, transcript, extraInfo, onRetry, o
 
       {data.traitScores?.length > 0 && !isCheerful && !data.isEarlyTermination && (
         <div className="review-section trait-rubric">
-          <h2>🎯 성향/시나리오 맞춤 대응 평가</h2>
+          <h2>🎯 {isParent ? "보호자 상황 맞춤 대응 평가" : "성향/시나리오 맞춤 대응 평가"}</h2>
           <div className="trait-rubric-list">
             {data.traitScores.map((item, i) => (
               <div key={i} className="trait-rubric-card">

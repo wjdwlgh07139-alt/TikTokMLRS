@@ -3,7 +3,6 @@ import { SCENARIOS } from "./scenarios.js";
 import MatchingContact from "./components/MatchingContact.jsx";
 import ClosingContact from "./components/ClosingContact.jsx";
 import PrepDashboard from "./components/PrepDashboard.jsx";
-import BottomTabBar from "./components/BottomTabBar.jsx";
 import HomeView from "./views/HomeView.jsx";
 import ChatView from "./views/ChatView.jsx";
 import ReviewView from "./views/ReviewView.jsx";
@@ -146,8 +145,6 @@ export default function App() {
           )}
         </>
       )}
-
-      <BottomTabBar currentPath={currentPath} onNavigate={handleNavigate} />
     </div>
   );
 }

@@ -14,10 +14,12 @@ const MOOD_LABEL = {
 
 function speakerLabel(scenario, role) {
   if (role === "user") return "선생님";
-  return scenario.group === "child" ? "아이" : "학부모";
+  return scenario.group === "parent" ? "보호자" : "아이";
 }
 
 function buildTranscript(scenario, log) {
+  const isParent = scenario.group === "parent";
+  const label = isParent ? "보호자" : "아이";
   let userTurnCount = 0;
   return log
     .map((m) => {
@@ -26,9 +28,9 @@ function buildTranscript(scenario, log) {
         return `[${userTurnCount}턴] 선생님: ${m.content}`;
       } else {
         if (userTurnCount === 0) {
-          return `[오프닝] 아이: ${m.content}`;
+          return `[오프닝] ${label}: ${m.content}`;
         } else {
-          return `[${userTurnCount}턴 아이 반응] 아이: ${m.content}`;
+          return `[${userTurnCount}턴 ${label} 반응] ${label}: ${m.content}`;
         }
       }
     })

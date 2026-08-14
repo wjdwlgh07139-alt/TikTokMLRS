@@ -245,6 +245,7 @@ export function createRehearsalRouter(ai, serverDir) {
       const targetTurns = persona?.turns || 3;
       const isEarlyTermination = turnMatches > 0 && turnMatches < targetTurns;
 
+      const isParent = persona?.group === "parent";
       const lines = transcript.split("\n");
 
       if (isMeaninglessSession(transcript)) {
@@ -256,14 +257,20 @@ export function createRehearsalRouter(ai, serverDir) {
           improve: [
             {
               quote: lines.find((l) => l.includes("선생님:"))?.replace(/\[.*?\]\s*선생님:\s*/, "") || "",
-              suggestion: "아이와의 대화 시 단발성 답변보다는 아이의 반응을 살피고 감정을 읽어주는 완결된 문장으로 응답해 주세요.",
-              better: "우리 째깍이 반가워! 오늘 선생님이랑 재미있는 놀이 해볼까?",
+              suggestion: isParent
+                ? "보호자와의 대화 시 단발성 답변보다는 보호자의 우려를 경청하고 공감하며 신뢰를 주는 완결된 문장으로 응답해 주세요."
+                : "아이와의 대화 시 단발성 답변보다는 아이의 반응을 살피고 감정을 읽어주는 완결된 문장으로 응답해 주세요.",
+              better: isParent
+                ? "어머님, 걱정 많으셨죠? 오늘 활동 세심하게 살피며 안전하게 진행하겠습니다."
+                : "우리 째깍이 반가워! 오늘 선생님이랑 재미있는 놀이 해볼까?",
             },
           ],
           rubric: defaultRubricNames.map((name) => ({ name, status: "no_opportunity", score: null })),
           traitScores: [],
           triggeredFails: [],
-          keep: "아이와의 만남에서는 성의 있고 정성 어린 표현이 관계 형성의 첫걸음입니다.",
+          keep: isParent
+            ? "보호자와의 소통에서는 경청과 신뢰감 있는 표현이 관계 형성의 핵심입니다."
+            : "아이와의 만남에서는 성의 있고 정성 어린 표현이 관계 형성의 첫걸음입니다.",
           targetTurns,
           actualTurns: turnMatches || targetTurns,
           isEarlyTermination,
@@ -276,26 +283,26 @@ export function createRehearsalRouter(ai, serverDir) {
       }
 
       let teacherTotal = 0, teacherCount = 0;
-      let childTotal = 0, childCount = 0;
+      let counterpartTotal = 0, counterpartCount = 0;
 
       lines.forEach((line) => {
         if (line.includes("선생님:")) {
           const text = line.replace(/\[.*?\]\s*선생님:\s*/, "");
           teacherTotal += text.length;
           teacherCount++;
-        } else if (line.includes("아이:")) {
-          const text = line.replace(/\[.*?\]\s*아이:\s*/, "");
-          childTotal += text.length;
-          childCount++;
+        } else if (line.includes("아이:") || line.includes("보호자:") || line.includes("학부모:")) {
+          const text = line.replace(/\[.*?\]\s*(아이|보호자|학부모):\s*/, "");
+          counterpartTotal += text.length;
+          counterpartCount++;
         }
       });
 
-      const totalChars = teacherTotal + childTotal || 1;
+      const totalChars = teacherTotal + counterpartTotal || 1;
       const utteranceStats = {
         teacherAvgLen: teacherCount ? Math.round(teacherTotal / teacherCount) : 0,
-        childAvgLen: childCount ? Math.round(childTotal / childCount) : 0,
+        childAvgLen: counterpartCount ? Math.round(counterpartTotal / counterpartCount) : 0,
         teacherRatio: Math.round((teacherTotal / totalChars) * 100),
-        childRatio: Math.round((childTotal / totalChars) * 100),
+        childRatio: Math.round((counterpartTotal / totalChars) * 100),
       };
 
       const system = composeReviewPrompt({

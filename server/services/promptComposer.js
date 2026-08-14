@@ -60,6 +60,8 @@ ${signals}
  * 성향 채점 항목(rubricItems) 및 실패 트리거 밟음 감지(triggeredFails)를 포함한 리뷰 프롬프트를 만듭니다. (v4 보정 엔진)
  */
 export function composeReviewPrompt({ title, transcript, trait, persona }) {
+  const isParent = persona?.group === "parent";
+  const counterpartName = isParent ? "보호자" : "아이";
   const whitelist = persona?.defaultRubricWhitelist || [];
   const scenarioRubrics = persona?.rubricItems || [];
   const traitRubrics = trait?.rubricItems || [];
@@ -83,7 +85,7 @@ export function composeReviewPrompt({ title, transcript, trait, persona }) {
     ? `이 시나리오에서 채점 가능한 기본 역량 항목: [${whitelist.join(", ")}].`
     : "대화 맥락에 따라 기회가 제공된 항목만 평가하세요.";
 
-  return `당신은 째깍이의 선임 돌봄 코치입니다. 아래는 신입 돌봄 교사(사용자)가 '${title}' 상황에서 연습한 대화입니다.
+  return `당신은 째깍이의 선임 돌봄 코치입니다. 아래는 신입 돌봄 교사(사용자)가 '${title}' 상황에서 ${counterpartName}와(과) 연습한 대화입니다.
 
 대화 기록:
 ${transcript}
@@ -112,7 +114,7 @@ ${failTriggerList}
       "trigger": "발생한 실패 트리거 내용",
       "turn": 선생님_발화_턴_번호(숫자 1~5),
       "userQuote": "해당 턴 실제 발화",
-      "childReaction": "아이가 보인 반응"
+      "childReaction": "${counterpartName}가 보인 반응"
     }
   ],
   "rubric": [

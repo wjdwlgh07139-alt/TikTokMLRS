@@ -171,7 +171,7 @@ a:focus-visible {
   max-width: var(--max-w);
   margin: 0 auto;
   min-height: 100vh;
-  padding: 16px var(--gutter) 90px;
+  padding: 16px var(--gutter) 32px;
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -3615,7 +3615,7 @@ a:focus-visible {
 .prep-container {
   max-width: 480px;
   margin: 0 auto;
-  padding: 0 16px 140px;
+  padding: 0 16px 32px;
   background: var(--bg);
   min-height: 100vh;
   box-sizing: border-box;
