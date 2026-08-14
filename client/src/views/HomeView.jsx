@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { SCENARIOS } from "../scenarios.js";
 import LevelDots from "../components/LevelDots.jsx";
 import TraitSelectorModal from "../components/TraitSelectorModal.jsx";
+import RehearsalRecommendBanner from "../components/RehearsalRecommendBanner.jsx";
 
 const LEVEL_LABEL = { easy: "쉬움", mid: "보통", hard: "도전" };
 
@@ -12,7 +13,7 @@ const EXPLAIN = {
     "보호자와 신뢰를 쌓는 대화 연습이에요. 어떻게 말을 건네면 좋을지 미리 감을 잡아봐요.",
 };
 
-export default function HomeView({ onSelect }) {
+export default function HomeView({ onSelect, onStartRehearsalFromRec }) {
   const [activeCat, setActiveCat] = useState("child");
   const [sheetScenario, setSheetScenario] = useState(null);
   const [traitSelectingScenario, setTraitSelectingScenario] = useState(null);
@@ -95,23 +96,21 @@ export default function HomeView({ onSelect }) {
 
   return (
     <>
-      {/* Screenshot-inspired Onboarding Top Bar */}
+      {/* Header Bar */}
       <div className="onboarding-top-bar">
-        <span className="onboarding-title">첫 돌봄 온보딩</span>
+        <span className="onboarding-title">째깍악어 | 악어선생님 온보딩</span>
       </div>
 
+      {/* Recommended Rehearsal Banner if applicable */}
+      {onStartRehearsalFromRec && (
+        <RehearsalRecommendBanner onSelectRecommendation={onStartRehearsalFromRec} />
+      )}
+
       <div className="hero">
-        <span className="hero-top-chip">신입 악어선생님을 위한</span>
         <h1>🐣 째깍 리허설</h1>
         <p className="sub">
           상황을 고르면 기준 · 문장 · 다음 행동이 나와요. 상황 하나를 골라 3~4번만 짧게 미리 연습해봐요.
         </p>
-
-        <div className="feature-pills">
-          <span className="pill-cyan">13가지 상황</span>
-          <span className="pill-green">시점별 검색</span>
-          <span className="pill-pink">문장 바로 복사</span>
-        </div>
 
         <div className="seg" role="tablist">
           <button

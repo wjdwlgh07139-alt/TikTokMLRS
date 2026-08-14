@@ -93,11 +93,25 @@ export default function MatchingContact() {
   const previewText = tplFn(v);
 
   return (
-    <div className="template-card">
-      <div className="d-eyebrow">보호자 첫 연락 템플릿</div>
-      <h2 className="d-title">상황 ➔ 정보 입력 ➔ 자동 완성 ➔ 복사</h2>
+    <>
+      {/* Header Bar */}
+      <div className="onboarding-top-bar">
+        <span className="onboarding-title">째깍악어 | 악어선생님 온보딩</span>
+      </div>
 
-      <div className="form-grid">
+      <div className="hero">
+        <h1>🤝 첫 연락 템플릿</h1>
+        <p className="sub">
+          매칭 직후 부모님께 보낼 첫 인사 문자를 상황에 맞춰 쉽고 빠르게 완성해요.
+          방문 전 준비사항(간식·미디어·주차 등)을 미리 조율하면 당일 혼선을 방지하고 신뢰도를 높일 수 있어요.
+        </p>
+      </div>
+
+      <div className="template-card">
+        <div className="d-eyebrow">상황별 맞춤 메시지 생성</div>
+        <h2 className="d-title">정보 입력 ➔ 템플릿 선택 ➔ 원클릭 복사</h2>
+
+        <div className="form-grid">
         <div className="field-row full">
           <div className="field">
             <label htmlFor="p_name">선생님 이름</label>
@@ -215,5 +229,6 @@ export default function MatchingContact() {
         </div>
       )}
     </div>
+    </>
   );
 }

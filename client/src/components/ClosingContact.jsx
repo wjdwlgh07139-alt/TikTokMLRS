@@ -234,11 +234,25 @@ export default function ClosingContact() {
   }
 
   return (
-    <div className="template-card">
-      <div className="d-eyebrow">보호자 종료 메시지 템플릿</div>
-      <h2 className="d-title">활동 완료 메시지 자동 작성</h2>
+    <>
+      {/* Header Bar */}
+      <div className="onboarding-top-bar">
+        <span className="onboarding-title">째깍악어 | 악어선생님 온보딩</span>
+      </div>
 
-      <div className="form-grid">
+      <div className="hero">
+        <h1>📝 돌봄 종료 템플릿</h1>
+        <p className="sub">
+          수업 후 활동 내용과 특이사항(건강·정서·사고 등)을 체계적으로 정리해 보호자님께 전달해요.
+          정확하고 따뜻한 피드백으로 보호자의 신뢰를 얻고 재매칭 만족도를 높일 수 있어요.
+        </p>
+      </div>
+
+      <div className="template-card">
+        <div className="d-eyebrow">활동 완료 메시지 자동 작성</div>
+        <h2 className="d-title">놀이 선택 ➔ 특이사항 기록 ➔ 원클릭 복사</h2>
+
+        <div className="form-grid">
         <div className="field-row full">
           <div className="field">
             <label htmlFor="c_name">선생님 이름</label>
@@ -444,5 +458,6 @@ export default function ClosingContact() {
         </div>
       )}
     </div>
+    </>
   );
 }
