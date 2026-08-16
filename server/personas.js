@@ -92,7 +92,7 @@ export const PERSONAS = [
     id: "why",
     group: "child",
     emoji: "❓",
-    title: "\"왜요?\" 공세 아이",
+    title: "호기심이 많은 아이",
     situation: "방문 30분 경과. 모든 발화가 꼬리 질문이며 난이도가 답할 수 없는 영역까지 올라가요.",
     tags: ["솔직한 인정", "함께 탐구"],
     level: "mid",

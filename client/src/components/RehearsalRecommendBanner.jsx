@@ -39,9 +39,9 @@ export default function RehearsalRecommendBanner({ onSelectRecommendation }) {
   return (
     <div className="home-recommend-banner">
       <div className="banner-left">
-        <span className="banner-badge">💡 배정 아동 맞춤 추천</span>
+        <span className="banner-badge">배정 아동 맞춤 추천</span>
         <h3 className="banner-title">
-          {topRec.childName} ({topRec.childAgeMonths}개월) · {topRec.emoji} {topRec.title}
+          {topRec.childName} ({topRec.childAgeMonths}개월) · {topRec.title}
         </h3>
         <p className="banner-reason">{topRec.reason}</p>
         {topRec.quote && topRec.quote !== "첫 방문 필수 추천" && (

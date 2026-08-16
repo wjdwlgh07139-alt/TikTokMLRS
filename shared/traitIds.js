@@ -7,7 +7,7 @@ export const TRAIT_IDS = {
   ROUGH: "rough",        // 터프한 아이 / 거친 표현
   QUIET: "quiet",        // 지나치게 조용한 아이
   ATTACHED: "attached",  // 과하게 들러붙는 아이
-  WHY: "why",            // "왜요?" 공세 아이
+  WHY: "why",            // 호기심이 많은 아이 ("왜요?" 질문)
   CHEERFUL: "cheerful",  // 활발하고 잘 노는 아이 (기본 균형 시나리오)
 };
 

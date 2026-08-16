@@ -3,6 +3,7 @@ import { SCENARIOS } from "../scenarios.js";
 import LevelDots from "../components/LevelDots.jsx";
 import TraitSelectorModal from "../components/TraitSelectorModal.jsx";
 import RehearsalRecommendBanner from "../components/RehearsalRecommendBanner.jsx";
+import TopHeader from "../components/TopHeader.jsx";
 
 const LEVEL_LABEL = { easy: "쉬움", mid: "보통", hard: "도전" };
 
@@ -12,6 +13,36 @@ const EXPLAIN = {
   parent:
     "보호자와 신뢰를 쌓는 대화 연습이에요. 어떻게 말을 건네면 좋을지 미리 감을 잡아봐요.",
 };
+
+function IconPin() {
+  return (
+    <svg className="job-row-svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+      <circle cx="12" cy="10" r="3" />
+    </svg>
+  );
+}
+
+function IconSmile() {
+  return (
+    <svg className="job-row-svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10" />
+      <path d="M8 14s1.5 2 4 2 4-2 4-2" />
+      <line x1="9" y1="9" x2="9.01" y2="9" />
+      <line x1="15" y1="9" x2="15.01" y2="9" />
+    </svg>
+  );
+}
+
+function IconTarget() {
+  return (
+    <svg className="job-row-svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10" />
+      <circle cx="12" cy="12" r="6" />
+      <circle cx="12" cy="12" r="2" />
+    </svg>
+  );
+}
 
 export default function HomeView({ onSelect, onStartRehearsalFromRec }) {
   const [activeCat, setActiveCat] = useState("child");
@@ -44,6 +75,7 @@ export default function HomeView({ onSelect, onStartRehearsalFromRec }) {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             scenarioId: targetScenario.id,
+            traitId: null,
             blindMode: false,
           }),
         });
@@ -97,9 +129,7 @@ export default function HomeView({ onSelect, onStartRehearsalFromRec }) {
   return (
     <>
       {/* Header Bar */}
-      <div className="onboarding-top-bar">
-        <span className="onboarding-title">째깍악어 | 악어선생님 온보딩</span>
-      </div>
+      <TopHeader />
 
       {/* Recommended Rehearsal Banner if applicable */}
       {onStartRehearsalFromRec && (
@@ -107,9 +137,11 @@ export default function HomeView({ onSelect, onStartRehearsalFromRec }) {
       )}
 
       <div className="hero">
-        <h1>🐣 째깍 리허설</h1>
+        <h1>
+          방문 전, <b>실전 리허설</b>로<br />대화 자신감을 키우세요
+        </h1>
         <p className="sub">
-          실제 돌봄 현장처럼 AI와 직접 1:1로 대화하며 아이를 대하는 요령을 익히는 연습 공간이에요. 상황을 골라 3~4번만 가볍게 말을 건네보며 아이에게 다가가는 자신감을 키워보세요.
+          실제 돌봄 현장에서 마주치는 다양한 상황을 AI와 1:1로 직접 대화하며 연습해보세요. 나만의 자연스러운 소통 방식을 찾고 첫 방문의 부담감을 덜어낼 수 있어요.
         </p>
 
         <div className="seg" role="tablist">
@@ -134,48 +166,83 @@ export default function HomeView({ onSelect, onStartRehearsalFromRec }) {
         </div>
       </div>
 
-      <div className="explain">{EXPLAIN[activeCat]}</div>
+      {/* 째깍악어 Reference Count & Sort Bar */}
+      <div className="tictoc-list-header">
+        <span className="tictoc-list-count">
+          <strong className="count-num">{currentScenarios.length}</strong>개의 리허설
+        </span>
+        <div className="tictoc-list-sort">
+          <span>기본 추천순 ▼</span>
+        </div>
+      </div>
 
       <div key={activeCat} className="rehearsal-list swap">
-        {currentScenarios.map((s, index) => (
+        {currentScenarios.map((s) => (
           <button
             key={s.id}
-            className="card"
+            className="tictoc-job-card"
             data-cat={s.group}
             data-id={s.id}
             aria-label={`${s.title} 연습 상세 보기`}
             onClick={() => setSheetScenario(s)}
           >
-            <div className="c-top">
-              <div className="card-num-badge">{String(index + 1).padStart(2, '0')}</div>
-              <div className="c-main">
-                <div className="c-title">{s.title}</div>
-                <div className="c-situation">{s.situation}</div>
+            {/* Card Header */}
+            <div className="job-card-header">
+              <div className="job-card-title-row">
+                <h3 className="job-card-title">{s.title}</h3>
+                <span className="job-card-count-badge">총 {s.turns}턴</span>
               </div>
-              <div className="c-right">
-                <span className="age">
-                  {s.group === "child" ? "아이" : "보호자"}
-                </span>
+              <div className="job-card-time-row">
+                <span>약 3분 소요 · 실전 1:1 대화</span>
               </div>
             </div>
 
-            {s.tags && s.tags.length > 0 && (
-              <div className="tags">
-                {s.tags.map((t, idx) => (
-                  <span key={idx} className="tag">
-                    연습 · <b>{t}</b>
-                  </span>
-                ))}
-              </div>
-            )}
+            {/* Hairline Divider */}
+            <div className="job-card-divider" />
 
-            <div className="c-meta">
-              <LevelDots level={s.level} />
-              <span className="sep">·</span>
-              <span>약 3분</span>
-              <span className="sep">·</span>
-              <span>{s.turns}턴 대화</span>
-              <span className="start">연습 시작 →</span>
+            {/* Card Body Rows with Icons */}
+            <div className="job-card-body">
+              <div className="job-info-row">
+                <span className="job-row-icon"><IconPin /></span>
+                <span className="job-row-text">{s.situation}</span>
+              </div>
+
+              <div className="job-info-row">
+                <span className="job-row-icon"><IconSmile /></span>
+                <span className="job-row-text">
+                  난이도 {LEVEL_LABEL[s.level] || s.level} · 놀이{" "}
+                  <span className="tictoc-ai-badge">째깍AI</span>{" "}
+                  <span className="tictoc-content-badge">리허설</span>
+                </span>
+              </div>
+
+              {s.tags && s.tags.length > 0 && (
+                <div className="job-info-row">
+                  <span className="job-row-icon"><IconTarget /></span>
+                  <span className="job-row-text">
+                    포인트 · {s.tags.join(" · ")}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* Card Footer */}
+            <div className="job-card-footer">
+              <div className="job-card-chips">
+                {s.level === "easy" && (
+                  <span className="job-chip green">난이도 쉬움</span>
+                )}
+                {s.level === "mid" && (
+                  <span className="job-chip amber">난이도 보통</span>
+                )}
+                {s.level === "hard" && (
+                  <span className="job-chip pink">난이도 도전</span>
+                )}
+              </div>
+
+              <div className="job-card-action">
+                <span className="action-start-text">연습 시작 &gt;</span>
+              </div>
             </div>
           </button>
         ))}

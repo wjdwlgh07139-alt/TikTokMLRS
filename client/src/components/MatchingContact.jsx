@@ -1,4 +1,5 @@
 import { useState } from "react";
+import TopHeader from "./TopHeader.jsx";
 
 const ASK_OPTIONS = [
   "간식 제공 여부",
@@ -95,140 +96,139 @@ export default function MatchingContact() {
   return (
     <>
       {/* Header Bar */}
-      <div className="onboarding-top-bar">
-        <span className="onboarding-title">째깍악어 | 악어선생님 온보딩</span>
-      </div>
+      <TopHeader />
 
       <div className="hero">
-        <h1>🤝 첫 연락 템플릿</h1>
+        <h1>
+          매칭 직후, <b>첫 연락 템플릿</b>으로<br />부모님과 원활하게 소통하세요
+        </h1>
         <p className="sub">
-          매칭 직후 부모님께 보낼 첫 인사 문자를 상황에 맞춰 쉽고 빠르게 완성해요.
-          방문 전 준비사항(간식·미디어·주차 등)을 미리 조율하면 당일 혼선을 방지하고 신뢰도를 높일 수 있어요.
+          매칭 직후 부모님께 드릴 첫인사와 사전 확인 사항을 빠르게 정리해요. 꼼꼼한 사전 소통으로 당일 혼선을 줄이고 시작부터 신뢰를 쌓아보세요.
         </p>
       </div>
 
       <div className="template-card">
         <div className="d-eyebrow">상황별 맞춤 메시지 생성</div>
-        <h2 className="d-title">정보 입력 ➔ 템플릿 선택 ➔ 원클릭 복사</h2>
+        <h2 className="d-title">정보 입력 · 템플릿 선택 · 원클릭 복사</h2>
 
         <div className="form-grid">
-        <div className="field-row full">
-          <div className="field">
-            <label htmlFor="p_name">선생님 이름</label>
+          <div className="field-row full">
+            <div className="field">
+              <label htmlFor="p_name">선생님 이름</label>
+              <input
+                id="p_name"
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="예: 김OO"
+              />
+            </div>
+
+            <div className="field">
+              <label htmlFor="p_child">아이 이름</label>
+              <input
+                id="p_child"
+                type="text"
+                value={child}
+                onChange={(e) => setChild(e.target.value)}
+                placeholder="예: OO"
+              />
+            </div>
+          </div>
+
+          <div className="field full">
+            <label htmlFor="p_date">활동 날짜·시간</label>
             <input
-              id="p_name"
+              id="p_date"
               type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="예: 김OO"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              placeholder="예: 7월 28일 오후 3시"
             />
           </div>
 
-          <div className="field">
-            <label htmlFor="p_child">아이 이름</label>
+          <div className="field full">
+            <label htmlFor="p_ask">확인하고 싶은 사항 (추가 옵션)</label>
+            <div className="pill-group" style={{ marginBottom: "6px" }}>
+              {ASK_OPTIONS.map((opt) => (
+                <button
+                  key={opt}
+                  type="button"
+                  className={`pill ${ask === opt ? "on" : ""}`}
+                  onClick={() => setAsk(ask === opt ? "" : opt)}
+                >
+                  {opt}
+                </button>
+              ))}
+            </div>
             <input
-              id="p_child"
+              id="p_ask"
               type="text"
-              value={child}
-              onChange={(e) => setChild(e.target.value)}
-              placeholder="예: OO"
+              value={ask}
+              onChange={(e) => setAsk(e.target.value)}
+              placeholder="옵션 선택 또는 직접 입력 (예: 간식 제공 여부)"
             />
           </div>
-        </div>
 
-        <div className="field full">
-          <label htmlFor="p_date">활동 날짜·시간</label>
-          <input
-            id="p_date"
-            type="text"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-            placeholder="예: 7월 28일 오후 3시"
-          />
-        </div>
-
-        <div className="field full">
-          <label htmlFor="p_ask">확인하고 싶은 사항 (추가 옵션)</label>
-          <div className="pill-group" style={{ marginBottom: "6px" }}>
-            {ASK_OPTIONS.map((opt) => (
-              <button
-                key={opt}
-                type="button"
-                className={`pill ${ask === opt ? "on" : ""}`}
-                onClick={() => setAsk(ask === opt ? "" : opt)}
-              >
-                {opt}
-              </button>
-            ))}
-          </div>
-          <input
-            id="p_ask"
-            type="text"
-            value={ask}
-            onChange={(e) => setAsk(e.target.value)}
-            placeholder="옵션 선택 또는 직접 입력 (예: 간식 제공 여부)"
-          />
-        </div>
-
-        <div className="field full">
-          <label>본문 템플릿 선택 (5종)</label>
-          <div className="pill-group">
-            {Object.keys(CONTACT_TEMPLATES).map((key) => (
-              <button
-                key={key}
-                type="button"
-                className={`pill ${templateKey === key ? "on" : ""}`}
-                onClick={() => setTemplateKey(key)}
-              >
-                {key}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      <div className="preview">
-        <div className="plabel">미리보기</div>
-        <div className="ptext">{previewText}</div>
-        <button type="button" className="copy-btn" onClick={handleCopyClick}>
-          문구 복사하기
-        </button>
-        {toast && <div className="toast show">복사했어요</div>}
-      </div>
-
-      {warningModal && (
-        <div className="modal-overlay" onClick={() => setWarningModal(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-icon">⚠️</div>
-            <h3>기본 문구 확인 필요</h3>
-            <p>
-              선생님 이름(<strong>{name}</strong>) 또는 아이 이름(
-              <strong>{child}</strong>)이 기본값 상태입니다.
-            </p>
-            <p className="sub">실제 성함으로 변경 후 복사하는 것을 권장합니다.</p>
-            <div className="modal-actions">
-              <button
-                type="button"
-                className="ghost-btn"
-                onClick={() => {
-                  setWarningModal(false);
-                  executeCopy();
-                }}
-              >
-                그대로 복사
-              </button>
-              <button
-                type="button"
-                className="primary-btn"
-                onClick={() => setWarningModal(false)}
-              >
-                이름 수정하기
-              </button>
+          <div className="field full">
+            <label>본문 템플릿 선택 (5종)</label>
+            <div className="pill-group">
+              {Object.keys(CONTACT_TEMPLATES).map((key) => (
+                <button
+                  key={key}
+                  type="button"
+                  className={`pill ${templateKey === key ? "on" : ""}`}
+                  onClick={() => setTemplateKey(key)}
+                >
+                  {key}
+                </button>
+              ))}
             </div>
           </div>
         </div>
-      )}
-    </div>
+
+        <div className="preview">
+          <div className="plabel">미리보기</div>
+          <div className="ptext">{previewText}</div>
+          <button type="button" className="copy-btn" onClick={handleCopyClick}>
+            문구 복사하기
+          </button>
+          {toast && <div className="toast show">복사했어요</div>}
+        </div>
+
+        {warningModal && (
+          <div className="modal-overlay" onClick={() => setWarningModal(false)}>
+            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+              <div className="modal-icon">⚠️</div>
+              <h3>기본 문구 확인 필요</h3>
+              <p>
+                선생님 이름(<strong>{name}</strong>) 또는 아이 이름(
+                <strong>{child}</strong>)이 기본값 상태입니다.
+              </p>
+              <p className="sub">실제 성함으로 변경 후 복사하는 것을 권장합니다.</p>
+              <div className="modal-actions">
+                <button
+                  type="button"
+                  className="ghost-btn"
+                  onClick={() => {
+                    setWarningModal(false);
+                    executeCopy();
+                  }}
+                >
+                  그대로 복사
+                </button>
+                <button
+                  type="button"
+                  className="primary-btn"
+                  onClick={() => setWarningModal(false)}
+                >
+                  이름 수정하기
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     </>
   );
 }

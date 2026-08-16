@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import TopHeader from "./TopHeader.jsx";
 
 export default function PrepDashboard({ childIdParam, onNavigate, onStartRehearsal }) {
   const [childrenList, setChildrenList] = useState([]);
@@ -304,9 +305,7 @@ export default function PrepDashboard({ childIdParam, onNavigate, onStartRehears
     return (
       <div className="prep-container">
         {/* Header Bar */}
-        <div className="onboarding-top-bar">
-          <span className="onboarding-title">째깍악어 | 악어선생님 온보딩</span>
-        </div>
+        <TopHeader />
 
         {/* Hero Header */}
         <div className="hero">
@@ -314,7 +313,7 @@ export default function PrepDashboard({ childIdParam, onNavigate, onStartRehears
             수업 전, <b>돌봄 노트</b>로<br />아이 성향을 확인하세요
           </h1>
           <p>
-            방문 전 담당 아동의 돌봄 노트를 분석하여 준비물 체크리스트와 맞춤 리허설을 추천해 드립니다.
+            방문 전 배정된 아동의 이전 돌봄 노트를 분석하여 필수 준비물과 주의사항, 맞춤 리허설을 추천해 드려요. 첫 만남 전 아이의 성향을 미리 파악해보세요.
           </p>
           <div className="feature-pills">
             <span className="pill-cyan">노트 분석</span>

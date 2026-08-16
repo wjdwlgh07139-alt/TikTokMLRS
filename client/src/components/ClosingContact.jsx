@@ -1,32 +1,33 @@
 import { useState } from "react";
+import TopHeader from "./TopHeader.jsx";
 
 const PRESET_TEMPLATES = [
   {
-    label: "🚗 블록·자동차",
+    label: "블록·자동차",
     activity: "자동차 주차장 만들기",
     content:
       "아이가 장난감 자동차에 관심을 보여 블록으로 주차장을 조립하고 즐거운 연계 놀이를 진행했습니다.",
   },
   {
-    label: "🎨 미술·만들기",
+    label: "미술·만들기",
     activity: "색종이 접기 및 그림 그리기",
     content:
       "좋아하는 캐릭터와 동물을 그리고 색종이 접기를 함께 진행하며 소근육 발달과 표현력을 기르는 시간을 가졌습니다.",
   },
   {
-    label: "📚 독서·이야기",
+    label: "독서·이야기",
     activity: "동화책 읽기 및 생각 나누기",
     content:
       "아이가 좋아하는 동화책을 읽고 이야기 속 등장인물에 대해 자유롭게 표현해보며 높은 집중력을 보였습니다.",
   },
   {
-    label: "🧩 보드게임·퍼즐",
+    label: "보드게임·퍼즐",
     activity: "보드게임 및 맞춤 퍼즐",
     content:
       "규칙이 있는 보드게임과 퍼즐 맞추기 놀이를 통해 차례를 지키고 문제를 해결해보는 성취감을 맛보았습니다.",
   },
   {
-    label: "🏃 실내 신체놀이",
+    label: "실내 신체놀이",
     activity: "신체 율동 및 장애물 통과 놀이",
     content:
       "신나는 음악에 맞춰 율동을 하고 안전한 실내 장애물 놀이를 통해 건강하게 에너지 발산 활동을 진행했습니다.",
@@ -169,7 +170,7 @@ export default function ClosingContact() {
   const [name, setName] = useState("김OO");
   const [child, setChild] = useState("OO");
   const [selectedActivityTpl, setSelectedActivityTpl] =
-    useState("🚗 블록·자동차");
+    useState("블록·자동차");
   const [activity, setActivity] = useState(PRESET_TEMPLATES[0].activity);
   const [content, setContent] = useState(PRESET_TEMPLATES[0].content);
   const [hasIssue, setHasIssue] = useState(false);
@@ -236,228 +237,226 @@ export default function ClosingContact() {
   return (
     <>
       {/* Header Bar */}
-      <div className="onboarding-top-bar">
-        <span className="onboarding-title">째깍악어 | 악어선생님 온보딩</span>
-      </div>
+      <TopHeader />
 
       <div className="hero">
-        <h1>📝 돌봄 종료 템플릿</h1>
+        <h1>
+          수업 후, <b>돌봄 종료 템플릿</b>으로<br />따뜻하고 정확한 후기를 남기세요
+        </h1>
         <p className="sub">
-          수업 후 활동 내용과 특이사항(건강·정서·사고 등)을 체계적으로 정리해 보호자님께 전달해요.
-          정확하고 따뜻한 피드백으로 보호자의 신뢰를 얻고 재매칭 만족도를 높일 수 있어요.
+          진행한 놀이 내용과 아이의 긍정 반응, 특이사항을 체계적으로 정리해요. 정성스럽고 전문적인 마무리 피드백으로 부모님의 안심과 재매칭 만족도를 높여보세요.
         </p>
       </div>
 
       <div className="template-card">
         <div className="d-eyebrow">활동 완료 메시지 자동 작성</div>
-        <h2 className="d-title">놀이 선택 ➔ 특이사항 기록 ➔ 원클릭 복사</h2>
+        <h2 className="d-title">놀이 선택 · 특이사항 기록 · 원클릭 복사</h2>
 
         <div className="form-grid">
-        <div className="field-row full">
-          <div className="field">
-            <label htmlFor="c_name">선생님 이름</label>
+          <div className="field-row full">
+            <div className="field">
+              <label htmlFor="c_name">선생님 이름</label>
+              <input
+                id="c_name"
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="예: 김OO"
+              />
+            </div>
+
+            <div className="field">
+              <label htmlFor="c_child">아이 이름</label>
+              <input
+                id="c_child"
+                type="text"
+                value={child}
+                onChange={(e) => setChild(e.target.value)}
+                placeholder="예: OO"
+              />
+            </div>
+          </div>
+
+          <div className="field full">
+            <label>활동 내용 빠른 입력</label>
+            <div className="pill-group">
+              {PRESET_TEMPLATES.map((tpl) => (
+                <button
+                  key={tpl.label}
+                  type="button"
+                  className={`pill ${selectedActivityTpl === tpl.label ? "on" : ""
+                    }`}
+                  onClick={() => handleSelectActivityTpl(tpl)}
+                >
+                  {tpl.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="field full">
+            <label htmlFor="c_activity">활동명</label>
             <input
-              id="c_name"
+              id="c_activity"
               type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="예: 김OO"
+              value={activity}
+              onChange={(e) => {
+                setActivity(e.target.value);
+                setSelectedActivityTpl("");
+              }}
+              placeholder="예: 자동차 주차장 만들기"
             />
           </div>
 
-          <div className="field">
-            <label htmlFor="c_child">아이 이름</label>
-            <input
-              id="c_child"
-              type="text"
-              value={child}
-              onChange={(e) => setChild(e.target.value)}
-              placeholder="예: OO"
+          <div className="field full">
+            <label htmlFor="c_content">활동 내용</label>
+            <textarea
+              id="c_content"
+              rows={3}
+              value={content}
+              onChange={(e) => {
+                setContent(e.target.value);
+                setSelectedActivityTpl("");
+              }}
+              placeholder="아이가 장난감 자동차에 관심을 보여..."
             />
           </div>
-        </div>
 
-        <div className="field full">
-          <label>활동 내용 빠른 입력</label>
-          <div className="pill-group">
-            {PRESET_TEMPLATES.map((tpl) => (
+          <div className="field full">
+            <label>특이사항 여부</label>
+            <div className="pill-group">
               <button
-                key={tpl.label}
                 type="button"
-                className={`pill ${
-                  selectedActivityTpl === tpl.label ? "on" : ""
-                }`}
-                onClick={() => handleSelectActivityTpl(tpl)}
+                className={`pill ${!hasIssue ? "on" : ""}`}
+                onClick={() => setHasIssue(false)}
               >
-                {tpl.label}
+                없음
               </button>
-            ))}
+              <button
+                type="button"
+                className={`pill ${hasIssue ? "on" : ""}`}
+                onClick={() => setHasIssue(true)}
+              >
+                있음
+              </button>
+            </div>
+          </div>
+
+          {hasIssue && (
+            <>
+              <div className="field full">
+                <label>
+                  특이사항 유형 선택 (사고·건강·정서 룰베이스)
+                </label>
+                <div className="pill-group">
+                  {Object.keys(ISSUE_TEMPLATES)
+                    .filter((k) => k !== "없음")
+                    .map((k) => (
+                      <button
+                        key={k}
+                        type="button"
+                        className={`pill ${issueKey === k ? "on" : ""}`}
+                        onClick={() => setIssueKey(k)}
+                      >
+                        {k}
+                      </button>
+                    ))}
+                </div>
+              </div>
+
+              <div className="field-row full">
+                <div className="field">
+                  <label htmlFor="c_where">다친 부위 / 발생 상황 (선택)</label>
+                  <input
+                    id="c_where"
+                    type="text"
+                    value={where}
+                    onChange={(e) => setWhere(e.target.value)}
+                    placeholder="예: 무릎, 팔, 놀이 도중"
+                  />
+                </div>
+
+                <div className="field">
+                  <label htmlFor="c_status">현재 상태 / 안내 (선택)</label>
+                  <input
+                    id="c_status"
+                    type="text"
+                    value={status}
+                    onChange={(e) => setStatus(e.target.value)}
+                    placeholder="예: 운영본부 안내에 따라 확인 중"
+                  />
+                </div>
+              </div>
+
+              {currentIssueItem.severity === "followup" && (
+                <div className="field full" style={{ fontSize: "0.85rem", color: "var(--ink-2)", fontWeight: "700" }}>
+                  📢 [공유 필요 사안] 이 항목은 활동 중 보호자 및 운영본부에 사전 공유가 필요한 사안입니다.
+                </div>
+              )}
+            </>
+          )}
+
+          <div className="field full">
+            <label>본문 템플릿 선택 (5종)</label>
+            <div className="pill-group">
+              {Object.keys(CLOSING_TEMPLATES).map((key) => (
+                <button
+                  key={key}
+                  type="button"
+                  className={`pill ${templateKey === key ? "on" : ""}`}
+                  onClick={() => setTemplateKey(key)}
+                >
+                  {key}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
-        <div className="field full">
-          <label htmlFor="c_activity">활동명</label>
-          <input
-            id="c_activity"
-            type="text"
-            value={activity}
-            onChange={(e) => {
-              setActivity(e.target.value);
-              setSelectedActivityTpl("");
-            }}
-            placeholder="예: 자동차 주차장 만들기"
-          />
+        <div className="preview">
+          <div className="plabel">미리보기</div>
+          <div className="ptext">{previewText}</div>
+          <button type="button" className="copy-btn" onClick={handleCopyClick}>
+            문구 복사하기
+          </button>
+          {toast && <div className="toast show">복사했어요</div>}
         </div>
 
-        <div className="field full">
-          <label htmlFor="c_content">활동 내용</label>
-          <textarea
-            id="c_content"
-            rows={3}
-            value={content}
-            onChange={(e) => {
-              setContent(e.target.value);
-              setSelectedActivityTpl("");
-            }}
-            placeholder="아이가 장난감 자동차에 관심을 보여..."
-          />
-        </div>
-
-        <div className="field full">
-          <label>특이사항 여부</label>
-          <div className="pill-group">
-            <button
-              type="button"
-              className={`pill ${!hasIssue ? "on" : ""}`}
-              onClick={() => setHasIssue(false)}
-            >
-              없음
-            </button>
-            <button
-              type="button"
-              className={`pill ${hasIssue ? "on" : ""}`}
-              onClick={() => setHasIssue(true)}
-            >
-              있음
-            </button>
+        {warningModal && (
+          <div className="modal-overlay" onClick={() => setWarningModal(false)}>
+            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+              <div className="modal-icon">⚠️</div>
+              <h3>기본 문구 확인 필요</h3>
+              <p>
+                선생님 이름(<strong>{name}</strong>) 또는 아이 이름(
+                <strong>{child}</strong>)이 기본값 상태입니다.
+              </p>
+              <p className="sub">
+                실제 성함으로 변경 후 복사하는 것을 권장합니다.
+              </p>
+              <div className="modal-actions">
+                <button
+                  type="button"
+                  className="ghost-btn"
+                  onClick={() => {
+                    setWarningModal(false);
+                    executeCopy();
+                  }}
+                >
+                  그대로 복사
+                </button>
+                <button
+                  type="button"
+                  className="primary-btn"
+                  onClick={() => setWarningModal(false)}
+                >
+                  이름 수정하기
+                </button>
+              </div>
+            </div>
           </div>
-        </div>
-
-        {hasIssue && (
-          <>
-            <div className="field full">
-              <label>
-                특이사항 유형 선택 (사고·건강·정서 룰베이스)
-              </label>
-              <div className="pill-group">
-                {Object.keys(ISSUE_TEMPLATES)
-                  .filter((k) => k !== "없음")
-                  .map((k) => (
-                    <button
-                      key={k}
-                      type="button"
-                      className={`pill ${issueKey === k ? "on" : ""}`}
-                      onClick={() => setIssueKey(k)}
-                    >
-                      {k}
-                    </button>
-                  ))}
-              </div>
-            </div>
-
-            <div className="field-row full">
-              <div className="field">
-                <label htmlFor="c_where">다친 부위 / 발생 상황 (선택)</label>
-                <input
-                  id="c_where"
-                  type="text"
-                  value={where}
-                  onChange={(e) => setWhere(e.target.value)}
-                  placeholder="예: 무릎, 팔, 놀이 도중"
-                />
-              </div>
-
-              <div className="field">
-                <label htmlFor="c_status">현재 상태 / 안내 (선택)</label>
-                <input
-                  id="c_status"
-                  type="text"
-                  value={status}
-                  onChange={(e) => setStatus(e.target.value)}
-                  placeholder="예: 운영본부 안내에 따라 확인 중"
-                />
-              </div>
-            </div>
-
-            {currentIssueItem.severity === "followup" && (
-              <div className="field full" style={{ fontSize: "0.85rem", color: "var(--ink-2)", fontWeight: "700" }}>
-                📢 [공유 필요 사안] 이 항목은 활동 중 보호자 및 운영본부에 사전 공유가 필요한 사안입니다.
-              </div>
-            )}
-          </>
         )}
-
-        <div className="field full">
-          <label>본문 템플릿 선택 (5종)</label>
-          <div className="pill-group">
-            {Object.keys(CLOSING_TEMPLATES).map((key) => (
-              <button
-                key={key}
-                type="button"
-                className={`pill ${templateKey === key ? "on" : ""}`}
-                onClick={() => setTemplateKey(key)}
-              >
-                {key}
-              </button>
-            ))}
-          </div>
-        </div>
       </div>
-
-      <div className="preview">
-        <div className="plabel">미리보기</div>
-        <div className="ptext">{previewText}</div>
-        <button type="button" className="copy-btn" onClick={handleCopyClick}>
-          문구 복사하기
-        </button>
-        {toast && <div className="toast show">복사했어요</div>}
-      </div>
-
-      {warningModal && (
-        <div className="modal-overlay" onClick={() => setWarningModal(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-icon">⚠️</div>
-            <h3>기본 문구 확인 필요</h3>
-            <p>
-              선생님 이름(<strong>{name}</strong>) 또는 아이 이름(
-              <strong>{child}</strong>)이 기본값 상태입니다.
-            </p>
-            <p className="sub">
-              실제 성함으로 변경 후 복사하는 것을 권장합니다.
-            </p>
-            <div className="modal-actions">
-              <button
-                type="button"
-                className="ghost-btn"
-                onClick={() => {
-                  setWarningModal(false);
-                  executeCopy();
-                }}
-              >
-                그대로 복사
-              </button>
-              <button
-                type="button"
-                className="primary-btn"
-                onClick={() => setWarningModal(false)}
-              >
-                이름 수정하기
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
     </>
   );
 }
